@@ -1,0 +1,57 @@
+[
+  {
+    "region": "Region X",
+    "product": "Product A",
+    "metric_name": "revenue",
+    "chosen_model": "prophet",
+    "chosen_model_mape_pct": 2.22,
+    "per_model_mape_pct": {
+      "prophet": 2.22,
+      "xgboost": 5.19
+    },
+    "n_backtest_points": {
+      "prophet": 350,
+      "xgboost": 350
+    },
+    "interval_residual_quantiles_used": [
+      -147.28,
+      156.62
+    ]
+  },
+  {
+    "region": "Region Y",
+    "product": "Product B",
+    "metric_name": "revenue",
+    "chosen_model": "prophet",
+    "chosen_model_mape_pct": 2.79,
+    "per_model_mape_pct": {
+      "prophet": 2.79,
+      "xgboost": 6.172
+    },
+    "n_backtest_points": {
+      "prophet": 350,
+      "xgboost": 350
+    },
+    "interval_residual_quantiles_used": [
+      -111.11,
+      118.98
+    ]
+  },
+  {
+    "region": "Region X",
+    "product": "Product A",
+    "metric_name": "units_sold",
+    "chosen_model": "prophet",
+    "chosen_model_mape_pct": 3.264,
+    "per_model_mape_pct": {
+      "prophet": 3.264
+    },
+    "n_backtest_points": {
+      "prophet": 350
+    },
+    "interval_residual_quantiles_used": [
+      -28.2,
+      32.35
+    ]
+  }
+]

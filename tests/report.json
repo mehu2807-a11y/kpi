@@ -1,0 +1,437 @@
+[
+  {
+    "scenario": "03_task2_real_viral_moment_spike_INCREASE",
+    "check": "Task 3's real gate confirms the real injected 'viral_moment' event as an anomaly",
+    "status": "PASS",
+    "detail": "verdict=anomaly, severity=1.0"
+  },
+  {
+    "scenario": "03_task2_real_viral_moment_spike_INCREASE",
+    "check": "downstream chain (Task 4->5->6) completed with no error",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "03_task2_real_viral_moment_spike_INCREASE",
+    "check": "StoryOutput produced with a defined confidence in [0,1]",
+    "status": "PASS",
+    "detail": 0.88
+  },
+  {
+    "scenario": "04_task2_real_logistics_outage_dip_REGION_Y",
+    "check": "Task 3's real gate confirms the real injected 'logistics_outage' event as an anomaly",
+    "status": "PASS",
+    "detail": "verdict=anomaly, severity=1.0"
+  },
+  {
+    "scenario": "04_task2_real_logistics_outage_dip_REGION_Y",
+    "check": "downstream chain (Task 4->5->6) completed with no error",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "04_task2_real_logistics_outage_dip_REGION_Y",
+    "check": "StoryOutput produced with a defined confidence in [0,1]",
+    "status": "PASS",
+    "detail": 0.88
+  },
+  {
+    "scenario": "05_task2_real_regional_event_spike_INCREASE_REGION_Y",
+    "check": "Task 3's real gate confirms the real injected 'regional_event_spike' event as an anomaly",
+    "status": "PASS",
+    "detail": "verdict=anomaly, severity=1.0"
+  },
+  {
+    "scenario": "05_task2_real_regional_event_spike_INCREASE_REGION_Y",
+    "check": "downstream chain (Task 4->5->6) completed with no error",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "05_task2_real_regional_event_spike_INCREASE_REGION_Y",
+    "check": "StoryOutput produced with a defined confidence in [0,1]",
+    "status": "PASS",
+    "detail": 0.88
+  },
+  {
+    "scenario": "06_task1_real_seeded_dip_real_documents",
+    "check": "the team's own seeded 3-day demand dip is caught by the real gate",
+    "status": "PASS",
+    "detail": {
+      "event_id": "evt_00001",
+      "metric_name": "revenue",
+      "region": "Region X",
+      "date": "2026-07-14",
+      "actual_value": 25821.18,
+      "expected_value": 78708.455,
+      "lower_bound": 64183.5964186155,
+      "upper_bound": 93233.3135813845,
+      "residual": -1.8206,
+      "direction": "below_expected",
+      "severity_score": 0.6138,
+      "verdict": "anomaly",
+      "detection": {
+        "statistical_flag": true,
+        "multivariate_flag": true,
+        "multivariate_status": "ok",
+        "multivariate_score": 0.6208,
+        "multivariate_fit_rows": 26,
+        "consecutive_flagged_periods": 3,
+        "secondary_threshold_breach": false,
+        "persistence_multiplier": 1.0
+      },
+      "correlated_metrics": []
+    }
+  },
+  {
+    "scenario": "06_task1_real_seeded_dip_real_documents",
+    "check": "full chain runs against Task 1's real MetricsTable + real DocumentStore with no error",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "06_task1_real_seeded_dip_real_documents",
+    "check": "the real negative support tickets Task 1 seeded were retrieved as evidence",
+    "status": "PASS",
+    "detail": [
+      "support",
+      "support",
+      "support",
+      "support",
+      "support",
+      "support",
+      "support",
+      "support"
+    ]
+  },
+  {
+    "scenario": "07_clean_single_driver_high_confidence",
+    "check": "shock window produces at least one confirmed anomaly",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "07_clean_single_driver_high_confidence",
+    "check": "chain completes with no error",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "07_clean_single_driver_high_confidence",
+    "check": "top driver correctly identified as avg_price",
+    "status": "PASS",
+    "detail": [
+      "CorrelationResult.avg_price",
+      "gen_doc_0000",
+      "gen_doc_0001"
+    ]
+  },
+  {
+    "scenario": "07_clean_single_driver_high_confidence",
+    "check": "escalate_flag is False (one dominant, corroborated cause)",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "07_clean_single_driver_high_confidence",
+    "check": "confidence is reasonably high (>0.6)",
+    "status": "PASS",
+    "detail": 0.92
+  },
+  {
+    "scenario": "08_ambiguous_two_competing_drivers_escalates",
+    "check": "escalate_flag is True on Task 6's own validated ambiguous fixture",
+    "status": "PASS",
+    "detail": "confidences=[0.88, 0.83]"
+  },
+  {
+    "scenario": "08_ambiguous_two_competing_drivers_escalates",
+    "check": "both competing hypotheses are surfaced, not collapsed to one",
+    "status": "PASS",
+    "detail": 2
+  },
+  {
+    "scenario": "09_competitor_evidence_surfaced",
+    "check": "shock window produces at least one confirmed anomaly",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "09_competitor_evidence_surfaced",
+    "check": "chain completes with no error",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "09_competitor_evidence_surfaced",
+    "check": "Task 5 flags competitor_activity_detected",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "09_competitor_evidence_surfaced",
+    "check": "the RivalCo document is tagged 'competitor'",
+    "status": "PASS",
+    "detail": [
+      [
+        "gen_doc_0000",
+        "competitor"
+      ]
+    ]
+  },
+  {
+    "scenario": "10_structured_driver_but_no_relevant_evidence",
+    "check": "shock window produces at least one confirmed anomaly",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "10_structured_driver_but_no_relevant_evidence",
+    "check": "chain completes with no error even with zero relevant evidence",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "10_structured_driver_but_no_relevant_evidence",
+    "check": "no in-scope evidence was retrieved",
+    "status": "PASS",
+    "detail": 0
+  },
+  {
+    "scenario": "10_structured_driver_but_no_relevant_evidence",
+    "check": "Task 6 still grounds a hypothesis in the structured driver alone",
+    "status": "PASS",
+    "detail": [
+      "CorrelationResult.avg_price"
+    ]
+  },
+  {
+    "scenario": "11_hallucinated_citation_is_dropped",
+    "check": "shock window produces at least one confirmed anomaly",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "11_hallucinated_citation_is_dropped",
+    "check": "chain completes with no error",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "11_hallucinated_citation_is_dropped",
+    "check": "the fabricated citation id never survives into the final StoryOutput",
+    "status": "PASS",
+    "detail": [
+      "CorrelationResult.avg_price"
+    ]
+  },
+  {
+    "scenario": "11_hallucinated_citation_is_dropped",
+    "check": "the real citation still grounds the hypothesis",
+    "status": "PASS",
+    "detail": [
+      "CorrelationResult.avg_price"
+    ]
+  },
+  {
+    "scenario": "12_no_grounding_escalates_to_analyst",
+    "check": "shock window produces at least one confirmed anomaly",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "12_no_grounding_escalates_to_analyst",
+    "check": "chain completes with no error",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "12_no_grounding_escalates_to_analyst",
+    "check": "all ungrounded hypotheses are dropped",
+    "status": "PASS",
+    "detail": []
+  },
+  {
+    "scenario": "12_no_grounding_escalates_to_analyst",
+    "check": "escalate_flag is True",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "12_no_grounding_escalates_to_analyst",
+    "check": "overall_confidence is 0.0",
+    "status": "PASS",
+    "detail": 0.0
+  },
+  {
+    "scenario": "12_no_grounding_escalates_to_analyst",
+    "check": "recommended action routes to a human analyst",
+    "status": "PASS",
+    "detail": [
+      "Route to an analyst for manual review \u2014 automated synthesis could not ground any hypothesis in the retrieved evidence."
+    ]
+  },
+  {
+    "scenario": "13_single_day_extreme_spike_secondary_threshold_path",
+    "check": "a single extreme day is still confirmed as anomaly",
+    "status": "PASS",
+    "detail": {
+      "event_id": "evt_00002",
+      "metric_name": "revenue",
+      "region": "Region X",
+      "date": "2026-04-06",
+      "actual_value": 23834.05412867978,
+      "expected_value": 52500.0,
+      "lower_bound": 51166.54742773851,
+      "upper_bound": 53833.45257226149,
+      "residual": -10.7488,
+      "direction": "below_expected",
+      "severity_score": 1.0,
+      "verdict": "anomaly",
+      "detection": {
+        "statistical_flag": true,
+        "multivariate_flag": true,
+        "multivariate_status": "ok",
+        "multivariate_score": 1.0,
+        "multivariate_fit_rows": 72,
+        "consecutive_flagged_periods": 1,
+        "secondary_threshold_breach": true,
+        "persistence_multiplier": 1.0
+      },
+      "correlated_metrics": []
+    }
+  },
+  {
+    "scenario": "13_single_day_extreme_spike_secondary_threshold_path",
+    "check": "confirmed via the SINGLE-PERIOD secondary-threshold override, not sustained persistence",
+    "status": "PASS",
+    "detail": {
+      "statistical_flag": true,
+      "multivariate_flag": true,
+      "multivariate_status": "ok",
+      "multivariate_score": 1.0,
+      "multivariate_fit_rows": 72,
+      "consecutive_flagged_periods": 1,
+      "secondary_threshold_breach": true,
+      "persistence_multiplier": 1.0
+    }
+  },
+  {
+    "scenario": "14_exact_3day_persistence_confirmation_path",
+    "check": "the sustained (but moderate) shift eventually confirms",
+    "status": "PASS",
+    "detail": [
+      "anomaly",
+      "anomaly",
+      "anomaly",
+      "anomaly",
+      "anomaly",
+      "anomaly"
+    ]
+  },
+  {
+    "scenario": "14_exact_3day_persistence_confirmation_path",
+    "check": "confirms via persistence (>=3 consecutive), not a single-day secondary-threshold breach",
+    "status": "PASS",
+    "detail": {
+      "statistical_flag": true,
+      "multivariate_flag": true,
+      "multivariate_status": "ok",
+      "multivariate_score": 0.9572,
+      "multivariate_fit_rows": 58,
+      "consecutive_flagged_periods": 9,
+      "secondary_threshold_breach": false,
+      "persistence_multiplier": 1.0
+    }
+  },
+  {
+    "scenario": "15_missing_correlated_metric_gap_handled",
+    "check": "the correlated series really does have a gap on the target date",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "15_missing_correlated_metric_gap_handled",
+    "check": "gate does not crash on a missing correlated-metric day and still reaches a verdict",
+    "status": "PASS",
+    "detail": "anomaly"
+  },
+  {
+    "scenario": "15_missing_correlated_metric_gap_handled",
+    "check": "correlated_metrics list on this record is correctly empty/absent for the gapped metric",
+    "status": "PASS",
+    "detail": {
+      "event_id": "evt_00009",
+      "metric_name": "revenue",
+      "region": "Region X",
+      "date": "2025-08-13",
+      "actual_value": 3386.69373014685,
+      "expected_value": 5488.556229128601,
+      "lower_bound": 5341.27853492608,
+      "upper_bound": 5645.176652583901,
+      "residual": -6.9163,
+      "direction": "below_expected",
+      "severity_score": 0.919,
+      "verdict": "anomaly",
+      "detection": {
+        "statistical_flag": true,
+        "multivariate_flag": true,
+        "multivariate_status": "ok",
+        "multivariate_score": 0.8379,
+        "multivariate_fit_rows": 69,
+        "consecutive_flagged_periods": 1,
+        "secondary_threshold_breach": true,
+        "persistence_multiplier": 1.0
+      },
+      "correlated_metrics": []
+    }
+  },
+  {
+    "scenario": "16_region_z_generality_check",
+    "check": "shock window produces at least one confirmed anomaly in a THIRD region",
+    "status": "PASS",
+    "detail": ""
+  },
+  {
+    "scenario": "16_region_z_generality_check",
+    "check": "chain completes with no error for a region never hardcoded anywhere",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "16_region_z_generality_check",
+    "check": "headline correctly reflects Region Z, not a hardcoded Region X",
+    "status": "PASS",
+    "detail": "Region Z revenue down 30.9%, most likely driven by a shift in marketing spend about 7d earlier"
+  },
+  {
+    "scenario": "01_ordinary_noise_days_real_task2_data",
+    "check": "the great majority of ordinary days (150 total, real Task 2 backtest data) resolve as noise",
+    "status": "PASS",
+    "detail": "150/150 = 100.0% noise"
+  },
+  {
+    "scenario": "01_ordinary_noise_days_real_task2_data",
+    "check": "no injected anomaly happens to fall inside this window (sanity check on the window choice)",
+    "status": "PASS",
+    "detail": {}
+  },
+  {
+    "scenario": "02_task2_real_supply_disruption_dip",
+    "check": "Task 3's real gate confirms the real injected 'supply_disruption' event as an anomaly",
+    "status": "PASS",
+    "detail": "verdict=anomaly, severity=0.9378"
+  },
+  {
+    "scenario": "02_task2_real_supply_disruption_dip",
+    "check": "downstream chain (Task 4->5->6) completed with no error",
+    "status": "PASS",
+    "detail": null
+  },
+  {
+    "scenario": "02_task2_real_supply_disruption_dip",
+    "check": "StoryOutput produced with a defined confidence in [0,1]",
+    "status": "PASS",
+    "detail": 0.92
+  }
+]

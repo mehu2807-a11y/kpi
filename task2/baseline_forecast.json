@@ -1,0 +1,902 @@
+[
+  {
+    "date":"2026-01-01",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6467.64,
+    "lower_bound":6320.37,
+    "upper_bound":6624.26,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-02",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6474.17,
+    "lower_bound":6326.9,
+    "upper_bound":6630.79,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-03",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6537.28,
+    "lower_bound":6390.01,
+    "upper_bound":6693.91,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-04",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6523.33,
+    "lower_bound":6376.05,
+    "upper_bound":6679.95,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-05",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6466.51,
+    "lower_bound":6319.23,
+    "upper_bound":6623.13,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-06",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":7117.53,
+    "lower_bound":6970.25,
+    "upper_bound":7274.15,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-07",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":7112.34,
+    "lower_bound":6965.07,
+    "upper_bound":7268.96,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-08",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":7111.56,
+    "lower_bound":6964.28,
+    "upper_bound":7268.18,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-09",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":7118.21,
+    "lower_bound":6970.93,
+    "upper_bound":7274.83,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-10",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":7181.1,
+    "lower_bound":7033.83,
+    "upper_bound":7337.72,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-11",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6524.8,
+    "lower_bound":6377.53,
+    "upper_bound":6681.42,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-12",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6467.07,
+    "lower_bound":6319.79,
+    "upper_bound":6623.69,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-13",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6475.06,
+    "lower_bound":6327.78,
+    "upper_bound":6631.68,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-14",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6468.3,
+    "lower_bound":6321.03,
+    "upper_bound":6624.92,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-15",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6465.65,
+    "lower_bound":6318.38,
+    "upper_bound":6622.28,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-16",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6470.2,
+    "lower_bound":6322.92,
+    "upper_bound":6626.82,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-17",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6530.78,
+    "lower_bound":6383.51,
+    "upper_bound":6687.4,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-18",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6513.81,
+    "lower_bound":6366.53,
+    "upper_bound":6670.43,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-19",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6453.53,
+    "lower_bound":6306.25,
+    "upper_bound":6610.15,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-20",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6458.95,
+    "lower_bound":6311.67,
+    "upper_bound":6615.57,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-21",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6449.66,
+    "lower_bound":6302.38,
+    "upper_bound":6606.28,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-22",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6444.58,
+    "lower_bound":6297.3,
+    "upper_bound":6601.2,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-23",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6446.85,
+    "lower_bound":6299.57,
+    "upper_bound":6603.47,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-24",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6505.38,
+    "lower_bound":6358.1,
+    "upper_bound":6662.0,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-25",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6486.6,
+    "lower_bound":6339.33,
+    "upper_bound":6643.22,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-26",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6424.84,
+    "lower_bound":6277.56,
+    "upper_bound":6581.46,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-27",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6429.11,
+    "lower_bound":6281.83,
+    "upper_bound":6585.73,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-28",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6419.03,
+    "lower_bound":6271.75,
+    "upper_bound":6575.65,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-29",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6413.54,
+    "lower_bound":6266.26,
+    "upper_bound":6570.16,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-30",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"revenue",
+    "expected_value":6415.78,
+    "lower_bound":6268.5,
+    "upper_bound":6572.4,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-01",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3684.07,
+    "lower_bound":3572.96,
+    "upper_bound":3803.04,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-02",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3696.73,
+    "lower_bound":3585.62,
+    "upper_bound":3815.7,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-03",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3713.39,
+    "lower_bound":3602.27,
+    "upper_bound":3832.36,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-04",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3715.06,
+    "lower_bound":3603.95,
+    "upper_bound":3834.03,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-05",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3687.75,
+    "lower_bound":3576.64,
+    "upper_bound":3806.72,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-06",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":4245.92,
+    "lower_bound":4134.81,
+    "upper_bound":4364.89,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-07",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":4239.78,
+    "lower_bound":4128.67,
+    "upper_bound":4358.76,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-08",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":4239.43,
+    "lower_bound":4128.32,
+    "upper_bound":4358.41,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-09",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":4254.63,
+    "lower_bound":4143.52,
+    "upper_bound":4373.61,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-10",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":4273.68,
+    "lower_bound":4162.57,
+    "upper_bound":4392.66,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-11",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3727.8,
+    "lower_bound":3616.69,
+    "upper_bound":3846.77,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-12",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3702.4,
+    "lower_bound":3591.29,
+    "upper_bound":3821.37,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-13",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3712.42,
+    "lower_bound":3601.31,
+    "upper_bound":3831.4,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-14",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3707.52,
+    "lower_bound":3596.41,
+    "upper_bound":3826.5,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-15",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3708.01,
+    "lower_bound":3596.9,
+    "upper_bound":3826.99,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-16",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3723.62,
+    "lower_bound":3612.51,
+    "upper_bound":3842.6,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-17",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3742.66,
+    "lower_bound":3631.55,
+    "upper_bound":3861.63,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-18",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3746.06,
+    "lower_bound":3634.95,
+    "upper_bound":3865.04,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-19",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3719.79,
+    "lower_bound":3608.68,
+    "upper_bound":3838.76,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-20",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3728.52,
+    "lower_bound":3617.41,
+    "upper_bound":3847.5,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-21",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3721.95,
+    "lower_bound":3610.84,
+    "upper_bound":3840.93,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-22",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3720.43,
+    "lower_bound":3609.32,
+    "upper_bound":3839.4,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-23",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3733.73,
+    "lower_bound":3622.62,
+    "upper_bound":3852.71,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-24",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3750.21,
+    "lower_bound":3639.1,
+    "upper_bound":3869.19,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-25",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3750.87,
+    "lower_bound":3639.76,
+    "upper_bound":3869.85,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-26",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3721.73,
+    "lower_bound":3610.62,
+    "upper_bound":3840.71,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-27",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3727.54,
+    "lower_bound":3616.43,
+    "upper_bound":3846.52,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-28",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3718.06,
+    "lower_bound":3606.95,
+    "upper_bound":3837.04,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-29",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3713.7,
+    "lower_bound":3602.59,
+    "upper_bound":3832.67,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-30",
+    "region":"Region Y",
+    "product":"Product B",
+    "metric_name":"revenue",
+    "expected_value":3724.3,
+    "lower_bound":3613.19,
+    "upper_bound":3843.28,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-01",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":709.28,
+    "lower_bound":681.08,
+    "upper_bound":741.64,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-02",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":713.75,
+    "lower_bound":685.55,
+    "upper_bound":746.1,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-03",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":715.57,
+    "lower_bound":687.37,
+    "upper_bound":747.93,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-04",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":718.35,
+    "lower_bound":690.15,
+    "upper_bound":750.71,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-05",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":710.28,
+    "lower_bound":682.08,
+    "upper_bound":742.64,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-06",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":831.17,
+    "lower_bound":802.97,
+    "upper_bound":863.53,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-07",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":834.2,
+    "lower_bound":806.0,
+    "upper_bound":866.56,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-08",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":830.86,
+    "lower_bound":802.65,
+    "upper_bound":863.21,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-09",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":835.42,
+    "lower_bound":807.21,
+    "upper_bound":867.77,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-10",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":837.3,
+    "lower_bound":809.1,
+    "upper_bound":869.66,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-11",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":718.65,
+    "lower_bound":690.45,
+    "upper_bound":751.01,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-12",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":710.59,
+    "lower_bound":682.39,
+    "upper_bound":742.94,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-13",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":710.0,
+    "lower_bound":681.79,
+    "upper_bound":742.35,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-14",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":712.97,
+    "lower_bound":684.77,
+    "upper_bound":745.33,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-15",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":709.55,
+    "lower_bound":681.34,
+    "upper_bound":741.9,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-16",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":714.01,
+    "lower_bound":685.8,
+    "upper_bound":746.36,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-17",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":715.78,
+    "lower_bound":687.57,
+    "upper_bound":748.13,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-18",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":718.46,
+    "lower_bound":690.26,
+    "upper_bound":750.81,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-19",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":710.26,
+    "lower_bound":682.05,
+    "upper_bound":742.61,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-20",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":709.52,
+    "lower_bound":681.31,
+    "upper_bound":741.87,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-21",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":712.35,
+    "lower_bound":684.15,
+    "upper_bound":744.7,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-22",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":708.79,
+    "lower_bound":680.58,
+    "upper_bound":741.14,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-23",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":713.12,
+    "lower_bound":684.91,
+    "upper_bound":745.47,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-24",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":714.77,
+    "lower_bound":686.57,
+    "upper_bound":747.13,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-25",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":717.35,
+    "lower_bound":689.15,
+    "upper_bound":749.71,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-26",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":709.07,
+    "lower_bound":680.86,
+    "upper_bound":741.42,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-27",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":708.27,
+    "lower_bound":680.06,
+    "upper_bound":740.62,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-28",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":711.06,
+    "lower_bound":682.85,
+    "upper_bound":743.41,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-29",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":707.47,
+    "lower_bound":679.26,
+    "upper_bound":739.82,
+    "model_used":"prophet"
+  },
+  {
+    "date":"2026-01-30",
+    "region":"Region X",
+    "product":"Product A",
+    "metric_name":"units_sold",
+    "expected_value":711.79,
+    "lower_bound":683.59,
+    "upper_bound":744.14,
+    "model_used":"prophet"
+  }
+]

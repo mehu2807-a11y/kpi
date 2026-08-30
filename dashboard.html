@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BusinessIntelligence.ai — dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #12151b; --panel: #1a1e27; --wire: #2a2f3a;
+    --paper: #ece9e1; --body-text: #c7c4bc; --dim: #8b91a0;
+    --signal: #e7a33e; --signal-soft: rgba(231,163,62,0.10);
+    --ok: #6fae7c; --ok-soft: rgba(111,174,124,0.12);
+    --warn: #e2645a; --warn-soft: rgba(226,100,90,0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ink); color:var(--body-text); font-family:'IBM Plex Sans',sans-serif; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:'IBM Plex Mono',monospace; }
+  .wrap { max-width: 1080px; margin:0 auto; padding: 40px 24px 80px; }
+
+  header.top { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap; margin-bottom:8px; }
+  .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--signal); margin:0 0 10px; }
+  h1 { font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:clamp(22px,4vw,30px); color:var(--paper); margin:0; letter-spacing:-0.01em; }
+  .sim-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--signal); border:1px solid var(--signal); border-radius:100px; padding:5px 12px; white-space:nowrap; }
+  .subtitle { font-size:14.5px; color:var(--dim); max-width:640px; margin:10px 0 32px; }
+
+  h2 { font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.04em; color:var(--dim); margin:0 0 14px; }
+  h2 .bracket { color:var(--signal); }
+  section { margin-bottom:36px; }
+
+  .kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+  .kpi-card { background:var(--panel); border:1px solid var(--wire); border-radius:8px; padding:16px; cursor:pointer; transition:border-color .15s ease; }
+  .kpi-card:hover { border-color:var(--dim); }
+  .kpi-card.active { border-color:var(--signal); }
+  .kpi-card.has-anomaly { border-color:var(--signal); background:linear-gradient(180deg, var(--signal-soft), var(--panel) 60%); }
+  .kpi-name { font-size:12px; color:var(--dim); margin:0 0 8px; }
+  .kpi-value { font-family:'IBM Plex Mono',monospace; font-size:20px; color:var(--paper); margin:0 0 6px; }
+  .kpi-delta { font-family:'IBM Plex Mono',monospace; font-size:12px; }
+  .kpi-delta.down { color:var(--warn); } .kpi-delta.up { color:var(--ok); } .kpi-delta.flat { color:var(--dim); }
+  .kpi-status { margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; padding:3px 8px; border-radius:100px; display:inline-block; }
+  .kpi-status.noise { background:var(--wire); color:var(--dim); }
+  .kpi-status.anomaly { background:var(--signal-soft); color:var(--signal); }
+
+  .story-panel { background:var(--panel); border:1px solid var(--wire); border-radius:8px; padding:24px; }
+  .story-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:14px;}
+  .story-headline { font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--paper); margin:0; max-width:640px; }
+  .confidence-wrap { text-align:right; min-width:140px; }
+  .confidence-num { font-family:'IBM Plex Mono',monospace; font-size:22px; color:var(--signal); }
+  .confidence-label { font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; }
+  .bar { height:5px; background:var(--wire); border-radius:100px; margin-top:6px; overflow:hidden; }
+  .bar-fill { height:100%; background:var(--signal); }
+
+  .persona-tabs { display:flex; gap:6px; margin:18px 0 16px; }
+  .persona-tab { font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--wire); color:var(--dim); border:none; border-radius:6px; padding:8px 14px; cursor:pointer; }
+  .persona-tab.active { background:var(--signal); color:var(--ink); font-weight:600; }
+  .persona-body p { font-size:14.5px; color:var(--body-text); margin:0 0 16px; }
+
+  .hyp { border-top:1px solid var(--wire); padding:14px 0; }
+  .hyp:first-child { border-top:none; }
+  .hyp-top { display:flex; justify-content:space-between; gap:12px; }
+  .hyp-cause { font-size:14.5px; color:var(--paper); margin:0; }
+  .hyp-conf { font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--signal); white-space:nowrap; }
+  .citations { margin:8px 0 0; display:flex; gap:6px; flex-wrap:wrap; }
+  .citation { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--dim); background:var(--ink); border:1px solid var(--wire); border-radius:4px; padding:2px 7px; }
+  .hyp-actions { margin:8px 0 0; padding-left:18px; font-size:13px; color:var(--body-text); }
+  .hyp-actions li { margin-bottom:3px; }
+
+  table.actions-table { width:100%; border-collapse:collapse; margin-top:6px; font-size:13px; }
+  table.actions-table th { text-align:left; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--dim); text-transform:uppercase; letter-spacing:.04em; padding:6px 10px; border-bottom:1px solid var(--wire); }
+  table.actions-table td { padding:10px 10px; border-bottom:1px solid var(--wire); color:var(--body-text); vertical-align:top; }
+  table.actions-table td.owner { color:var(--paper); white-space:nowrap; }
+  .conf-pill { font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:2px 8px; border-radius:100px; white-space:nowrap; }
+  .conf-pill.High { background:var(--ok-soft); color:var(--ok); }
+  .conf-pill.Medium { background:var(--signal-soft); color:var(--signal); }
+  .conf-pill.Low { background:var(--warn-soft); color:var(--warn); }
+
+  .telemetry { display:flex; gap:22px; flex-wrap:wrap; margin-top:20px; padding-top:16px; border-top:1px solid var(--wire); }
+  .telem-item { font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--dim); }
+  .telem-item b { color:var(--paper); font-weight:500; }
+
+  .noise-panel { background:var(--panel); border:1px solid var(--wire); border-radius:8px; padding:20px; color:var(--dim); font-size:13.5px; }
+  .noise-panel .tag { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--dim); background:var(--wire); border-radius:100px; padding:3px 9px; margin-right:8px; }
+
+  .integration-panel { background:var(--panel); border:1px solid var(--wire); border-radius:8px; padding:20px; }
+  .integration-panel pre { background:var(--ink); border:1px solid var(--wire); border-radius:6px; padding:14px; overflow-x:auto; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--body-text); margin:10px 0 0; }
+  .flow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--dim); margin-bottom:14px; }
+  .flow .node { background:var(--ink); border:1px solid var(--wire); border-radius:6px; padding:6px 10px; color:var(--paper); }
+  .flow .arrow { color:var(--signal); }
+
+  .prompt-line { font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--paper); border-top:1px solid var(--wire); margin-top:44px; padding-top:18px; }
+  .prompt-line .sym { color:var(--signal); margin-right:8px; }
+
+  @media (max-width:820px){ .kpi-grid{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:520px){ .kpi-grid{ grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <p class="eyebrow">kpi storytelling engine — dashboard</p>
+      <h1>BusinessIntelligence.ai</h1>
+    </div>
+    <span class="sim-badge">SIMULATED DATA — for presentation</span>
+  </header>
+  <p class="subtitle">Every number and story below is fixed sample data, shaped exactly like the real API response from <code class="mono">POST /analyze</code>. Click a KPI card to see what happens when it's quiet versus when it's real.</p>
+
+  <section>
+    <h2><span class="bracket">[</span> kpis being watched <span class="bracket">]</span></h2>
+    <div class="kpi-grid" id="kpiGrid"></div>
+  </section>
+
+  <section>
+    <h2><span class="bracket">[</span> selected kpi <span class="bracket">]</span></h2>
+    <div id="detailPanel"></div>
+  </section>
+
+  <section>
+    <h2><span class="bracket">[</span> how this connects to real data <span class="bracket">]</span></h2>
+    <div class="integration-panel">
+      <div class="flow">
+        <span class="node">Your data warehouse</span><span class="arrow">→</span>
+        <span class="node">task1 (ingest)</span><span class="arrow">→</span>
+        <span class="node">orchestrator</span><span class="arrow">→</span>
+        <span class="node">POST /analyze</span><span class="arrow">→</span>
+        <span class="node">this dashboard</span>
+      </div>
+      <p style="margin:0 0 6px;">Swap the mock data at the top of this file for a real <code class="mono">fetch()</code> to your running <code class="mono">app.py</code>, on the same JSON shape shown here:</p>
+      <pre id="contractPreview"></pre>
+    </div>
+  </section>
+
+  <p class="prompt-line"><span class="sym">&gt;</span>full setup and data-integration steps are in INTEGRATION.md</p>
+</div>
+
+<script>
+const DATA = {
+  revenue_total: {
+    name: "Total Revenue", value: "$71,200", delta: "-15.7%", deltaDir: "down", status: "anomaly",
+    story: {
+      headline: "Region X revenue down 7.5%, most likely driven by 10% price increase on Product A, effective July 4, reduced regional demand",
+      overall_confidence: 0.92, escalate_flag: false,
+      hypotheses: [
+        { cause: "10% price increase on Product A, effective July 4, reduced regional demand", confidence: 0.92,
+          citations: ["CorrelationResult.avg_price", "internal_00091", "news_00231"],
+          actions: ["Compare Region X's price elasticity for Product A against the assumption used when the increase was approved",
+                     "Check whether the drop is concentrated in Product A or spread across the regional basket"] },
+        { cause: "CompetitorCo's summer promotion pulled share in overlapping markets", confidence: 0.28,
+          citations: ["news_00255"],
+          actions: ["Confirm CompetitorCo's promotion end date before reversing any price change"] }
+      ],
+      structured_actions: [
+        { driver: "10% list-price increase on Product A, effective Jul 4", controllable_leverage: "pricing strategy",
+          action: "Coordinate with sales team to communicate the pricing change to key accounts", expected_impact: "Expected 5.5% change in revenue per unit",
+          owner: "VP of Pricing", confidence: "High", monitoring_plan: "Monitor daily average selling price and sales volume; review in weekly business review" },
+        { driver: "CompetitorCo summer promotion", controllable_leverage: "competitive response",
+          action: "Confirm promotion end date before adjusting price back", expected_impact: "Limits further share loss in overlapping markets",
+          owner: "Regional Sales Lead", confidence: "Medium", monitoring_plan: "Weekly competitor pricing scan" }
+      ],
+      personas: {
+        EXECUTIVE: { headline: "Region X revenue down 7.5% — Business Impact Analysis",
+          explanation: "A recent price change is the most likely driver of the Region X revenue decline. Financial exposure is contained to one region and one product line; a secondary, weaker signal points to competitor activity." },
+        ANALYST: { headline: "Region X revenue down 7.5% — Root Cause Analysis",
+          explanation: "Structured correlation ranks avg_price as the dominant driver (7d lag, Granger precedence confirmed). Two independent sources corroborate: an internal pricing note and a Reuters piece on regional reaction. A secondary competitor-promotion hypothesis is retained at lower confidence due to a single, less specific source." },
+        OPERATIONS: { headline: "Region X revenue down 7.5% — Action Required",
+          explanation: "Price increase on Product A (Jul 4) is the leading cause. Two concrete checks recommended this week before any pricing reversal." }
+      },
+      telemetry: { llm_calls: 1, llm_total_tokens_estimate: 838, estimated_cost_usd: 0.001676, processing_latency_ms: 0.39, evidence_sources_count: 3, structured_drivers_count: 2 }
+    }
+  },
+  units_sold: { name: "Units Sold", value: "12,480", delta: "-1.2%", deltaDir: "down", status: "noise" },
+  avg_price: { name: "Average Selling Price", value: "$41.20", delta: "+0.3%", deltaDir: "flat", status: "noise" },
+  marketing_spend: { name: "Marketing Spend", value: "$2,180", delta: "-0.8%", deltaDir: "flat", status: "noise" },
+  inventory_level: { name: "Inventory Level", value: "11,940 units", delta: "+2.1%", deltaDir: "up", status: "noise" }
+};
+
+const grid = document.getElementById('kpiGrid');
+const detail = document.getElementById('detailPanel');
+let selected = "revenue_total";
+let activePersona = "EXECUTIVE";
+
+function renderGrid() {
+  grid.innerHTML = "";
+  Object.entries(DATA).forEach(([id, k]) => {
+    const el = document.createElement('div');
+    el.className = "kpi-card" + (id === selected ? " active" : "") + (k.status === "anomaly" ? " has-anomaly" : "");
+    el.onclick = () => { selected = id; activePersona = "EXECUTIVE"; renderGrid(); renderDetail(); };
+    el.innerHTML = `
+      <p class="kpi-name">${k.name}</p>
+      <p class="kpi-value">${k.value}</p>
+      <span class="kpi-delta ${k.deltaDir}">${k.delta} vs. expected</span><br/>
+      <span class="kpi-status ${k.status}">${k.status === "anomaly" ? "Anomaly detected" : "Within expected range"}</span>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function renderDetail() {
+  const k = DATA[selected];
+  if (k.status === "noise") {
+    detail.innerHTML = `
+      <div class="noise-panel">
+        <span class="tag">verdict: noise</span> ${k.name} moved ${k.delta}, well inside its expected range.
+        Task 3's gate stopped here — no correlation call, no retrieval call, no LLM call was made for this metric.
+        That's the point: most days should look exactly like this.
+      </div>`;
+    return;
+  }
+  const s = k.story;
+  const p = s.personas[activePersona];
+  detail.innerHTML = `
+    <div class="story-panel">
+      <div class="story-head">
+        <h3 class="story-headline">${p.headline}</h3>
+        <div class="confidence-wrap">
+          <div class="confidence-num">${Math.round(s.overall_confidence*100)}%</div>
+          <div class="confidence-label">confidence · ${s.escalate_flag ? "escalated" : "auto-published"}</div>
+          <div class="bar"><div class="bar-fill" style="width:${s.overall_confidence*100}%"></div></div>
+        </div>
+      </div>
+      <div class="persona-tabs">
+        ${["EXECUTIVE","ANALYST","OPERATIONS"].map(pid => `<button class="persona-tab ${pid===activePersona?"active":""}" data-persona="${pid}">${pid.charAt(0)+pid.slice(1).toLowerCase()}</button>`).join("")}
+      </div>
+      <div class="persona-body"><p>${p.explanation}</p></div>
+
+      <h2 style="margin-top:22px;"><span class="bracket">[</span> ranked hypotheses <span class="bracket">]</span></h2>
+      ${s.hypotheses.map(h => `
+        <div class="hyp">
+          <div class="hyp-top"><p class="hyp-cause">${h.cause}</p><span class="hyp-conf">${Math.round(h.confidence*100)}%</span></div>
+          <div class="citations">${h.citations.map(c=>`<span class="citation">${c}</span>`).join("")}</div>
+          <ul class="hyp-actions">${h.actions.map(a=>`<li>${a}</li>`).join("")}</ul>
+        </div>`).join("")}
+
+      <h2 style="margin-top:22px;"><span class="bracket">[</span> structured actions <span class="bracket">]</span></h2>
+      <table class="actions-table">
+        <thead><tr><th>Driver</th><th>Lever</th><th>Action</th><th>Impact</th><th>Owner</th><th>Confidence</th></tr></thead>
+        <tbody>
+          ${s.structured_actions.map(a => `<tr>
+            <td>${a.driver}</td><td>${a.controllable_leverage}</td><td>${a.action}</td>
+            <td>${a.expected_impact}</td><td class="owner">${a.owner}</td>
+            <td><span class="conf-pill ${a.confidence}">${a.confidence}</span></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+
+      <div class="telemetry">
+        <span class="telem-item">llm calls: <b>${s.telemetry.llm_calls}</b></span>
+        <span class="telem-item">tokens: <b>${s.telemetry.llm_total_tokens_estimate}</b></span>
+        <span class="telem-item">est. cost: <b>$${s.telemetry.estimated_cost_usd}</b></span>
+        <span class="telem-item">latency: <b>${s.telemetry.processing_latency_ms}ms</b></span>
+        <span class="telem-item">evidence sources: <b>${s.telemetry.evidence_sources_count}</b></span>
+        <span class="telem-item">structured drivers: <b>${s.telemetry.structured_drivers_count}</b></span>
+      </div>
+    </div>`;
+  detail.querySelectorAll('.persona-tab').forEach(btn => {
+    btn.onclick = () => { activePersona = btn.dataset.persona; renderDetail(); };
+  });
+}
+
+document.getElementById('contractPreview').textContent =
+`fetch('http://localhost:5000/analyze', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({backend: 'mock', test_case: 'easy'})
+}).then(r => r.json()).then(data => {
+  // data.original_story, data.persona_narratives,
+  // data.structured_actions, data.relevant_kpis, data.telemetry
+  // -- exactly the shape rendered on this page.
+});`;
+
+renderGrid();
+renderDetail();
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "scenario": "price_increase",
+  "description": "A price increase on a flagship SKU reduces demand with a lag",
+  "region": "Region X",
+  "metric": "revenue",
+  "anomaly_start_date": "2026-04-06T00:00:00",
+  "true_driver": "avg_price",
+  "shock_pct": -0.2,
+  "driver_lag_days": 7,
+  "sparse_history": false
+}

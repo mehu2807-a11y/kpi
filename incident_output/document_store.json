@@ -1,0 +1,16 @@
+[
+  {
+    "doc_id": "price_increase_000",
+    "date": "2026-04-06",
+    "source": "internal_pricing",
+    "region_tags": [
+      "Region X"
+    ],
+    "entity_tags": [
+      "pricing",
+      "Product A"
+    ],
+    "sentiment_score": 0.0,
+    "raw_text": "Pricing committee approved 15% list-price increase on Product A effective this week in Region X. Expected demand elasticity: -1.2."
+  }
+]

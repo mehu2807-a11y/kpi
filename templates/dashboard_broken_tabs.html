@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Health Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+                :root {
+      --bg: #080808;
+      --surface-sidebar: #0B0B0B;
+      --surface: #111111;
+      --surface2: #161616;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #F5F5F5;
+      --text2: #A0A0A0;
+      --muted: #6F6F6F;
+      --accent: #A100FF;
+      --accent-s: rgba(161, 0, 255, 0.10);
+      --accent-b: #6E00B8;
+      --green: #16a34a;
+      --green-s: rgba(22, 163, 74, 0.15);
+      --red: #dc2626;
+      --red-s: rgba(220, 38, 38, 0.15);
+      --blue: #A100FF;
+      --blue-s: rgba(161, 0, 255, 0.10);
+      --sh: 0 4px 12px rgba(0,0,0,0.5);
+      --sh2: 0 8px 24px rgba(0,0,0,0.6);
+      --r: 8px; --rs: 4px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px}
+
+    /* Tooltips */
+    .tip{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--blue-s);color:var(--blue);font-size:10px;font-weight:600;cursor:help;border:1px solid rgba(59,130,246,.25);flex-shrink:0;position:relative;vertical-align:middle;margin-left:4px}
+    .tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--surface2); border:1px solid var(--border);color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:400;line-height:1.5;padding:8px 12px;border-radius:6px;width:240px;white-space:normal;text-align:left;pointer-events:none;opacity:0;transition:opacity .15s;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+    .tip:hover::after{opacity:1}
+
+    
+    /* LAYOUT & SIDEBAR */
+    body { background: var(--bg); margin: 0; padding: 0; }
+    .app-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: 240px; background: var(--surface-sidebar); border-right: 1px solid var(--border); padding: 24px; flex-shrink: 0; display: flex; flex-direction: column; }
+    .brand { margin-bottom: 40px; }
+    .brand-title { font-size: 16px; font-weight: 700; color: #F5F5F5; letter-spacing: 0.05em; }
+    .brand-subtitle { font-size: 11px; font-weight: 500; color: #A0A0A0; margin-top: 2px; }
+    .nav { display: flex; flex-direction: column; gap: 8px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; height: 44px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #A0A0A0; text-decoration: none; transition: background 150ms, color 150ms; position: relative; }
+    .nav-icon { width: 18px; height: 18px; stroke: #777777; transition: stroke 150ms; }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: #F5F5F5; }
+    .nav-item.active { background: var(--accent-s); color: #F5F5F5; }
+    .nav-item.active .nav-icon { stroke: var(--accent); }
+    .nav-item.active::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; background: var(--accent); border-radius: 0 4px 4px 0; }
+    .nav-divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    
+    /* NEW HEADER */
+    .app-hdr { height: 72px; background: #080808; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0 32px; display: flex; justify-content: space-between; align-items: center; }
+    .hdr-left h1 { font-size: 28px; font-weight: 600; color: #F5F5F5; line-height: 1.2; }
+    .hdr-left .sub { font-size: 13px; color: #A0A0A0; margin-top: 6px; }
+    .hdr-right { display: flex; gap: 16px; align-items: center; }
+    
+    /* Modify existing wrap */
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 32px 80px; width: 100%; }
+
+    /* Override header select control styling */
+    .hdr-right select { background: #111111; color: #F5F5F5; border: 1px solid rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; font-family: 'Inter', sans-serif; cursor: pointer; }
+    .hdr-right select:focus { border-color: var(--accent); }
+    
+    .live-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #A0A0A0; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #16a34a; }
+
+    /* Header Backup */
+    .app-hdr{background:var(--bg);border-bottom:1px solid var(--border);padding:24px 0 32px 0;margin-bottom:32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+    .app-hdr .label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+    .app-hdr h1{font-size:22px;font-weight:600}
+    .app-hdr .sub{font-size:13px;color:var(--muted);margin-top:2px}
+    .live-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-s);color:var(--green);border:1px solid rgba(16,185,129,.3);border-radius:100px;padding:5px 14px;font-size:12px;font-weight:600}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pdot 2s infinite}
+    @keyframes pdot{0%,100%{opacity:1}50%{opacity:.4}}
+    .warn-banner{display:none;background:var(--accent-s);border:1px solid var(--accent-b);color:var(--accent);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:500;align-items:center;gap:6px}
+
+    /* Settings */
+    .sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:32px;box-shadow:var(--sh)}
+    .sr{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+    .fld{display:flex;flex-direction:column;gap:4px}
+    .flbl{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
+    .sc select,.sc input[type=text],.sc input[type=password]{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:7px 10px;border-radius:var(--rs);font-size:13px;font-family:'Inter',sans-serif;outline:none}
+    .sc select:focus,.sc input:focus{border-color:var(--blue)}
+    .dv{width:1px;background:var(--border);align-self:stretch;margin:0 4px}
+    .sr2{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+    .tlbl{font-size:12px;color:var(--text2);white-space:nowrap}
+    .tv{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);min-width:28px}
+    input[type=range]{accent-color:var(--accent);cursor:pointer}
+    #backtestResult{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:4px 10px;border-radius:100px}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:var(--rs);padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:filter .15s;font-family:'Inter',sans-serif}
+    .btn:hover{filter:brightness(.92)}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+    .btn-blue{background:var(--blue);color:#fff}
+    .btn-sm{padding:5px 12px;font-size:12px}
+    .upload-btn{background:var(--blue-s);color:var(--blue);border:1px solid rgba(59,130,246,.3);border-radius:var(--rs);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+    .upload-btn:hover{background:var(--blue);color:#fff}
+
+    /* Section */
+    .sec{margin-bottom:28px}
+    .sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+    .sec-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+    .sec-desc{font-size:12px;color:var(--muted);font-weight:400;margin-left:4px}
+
+    /* Magic AI Input */
+    .magic-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px;margin-bottom:32px;box-shadow:var(--sh)}
+    .magic-card h2{font-size:17px;font-weight:600;margin-bottom:6px}
+    .magic-desc{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.7}
+    .sample-lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+    .magic-card textarea{width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:12px 14px;border-radius:var(--rs);font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;resize:vertical;margin-bottom:14px;outline:none}
+    .magic-card textarea:focus{border-color:var(--accent)}
+    .magic-footer{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .magic-timer{display:none;font-size:12px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:6px 14px;border-radius:100px}
+    .magic-error{display:none;background:var(--red-s);border:1px solid var(--red);color:var(--red);border-radius:var(--rs);padding:10px 14px;font-size:13px;margin-top:12px}
+
+    /* Query bar */
+    .qbar{display:flex;gap:10px;align-items:center;margin-bottom:20px}
+    .qbar input{flex:1;background:var(--surface);color:var(--text);border:1px solid var(--border);padding:11px 16px;border-radius:var(--rs);font-size:14px;font-family:'Inter',sans-serif;outline:none;box-shadow:var(--sh)}
+    .qbar input:focus{border-color:var(--blue)}
+    #nlResult{display:none;background:var(--blue-s);border:1px solid rgba(59,130,246,.3);color:var(--blue);border-radius:var(--rs);padding:10px 14px;font-size:13px;margin-bottom:16px}
+
+    /* KPI Grid */
+    .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+    @media(max-width:860px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:560px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+    .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;cursor:pointer;transition:all .2s ease;box-shadow:var(--sh)}
+    .kpi-card:hover{border-color:var(--muted);box-shadow:var(--sh2)}
+    .kpi-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+    .kpi-card.has-anomaly{border-color:var(--accent-b);}
+    .kpi-card.has-warning{border-color:var(--muted)}
+    @keyframes wpulse{0%,100%{opacity:1}50%{opacity:0.6}}
+    .kpi-name{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+    .kpi-value{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:400;letter-spacing:-0.02em;color:var(--text);margin-bottom:4px}
+    .kpi-delta{font-size:12px;font-weight:500}
+    .kpi-delta.down{color:var(--red)}.kpi-delta.up{color:var(--green)}.kpi-delta.flat{color:var(--muted)}
+    .kpi-badge{display:inline-block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:100px;margin-top:8px}
+    .kpi-badge.noise{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+    .kpi-badge.anomaly{background:var(--accent-s);color:var(--accent);border:1px solid var(--accent-b)}
+    .sparkline{margin-top:10px;width:100%;height:30px;display:block}
+
+    /* Generic card */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px 32px;box-shadow:var(--sh)}
+    .story-empty{text-align:center;padding:40px 20px;color:var(--muted)}
+    .story-empty .ei{font-size:40px;margin-bottom:12px}
+    .story-empty p{font-size:14px}
+
+    /* Story */
+    .story-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+    .story-headline{font-size:18px;font-weight:600;line-height:1.4;max-width:620px}
+    .conf-block{text-align:right;flex-shrink:0}
+    .conf-num{font-size:28px;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+    .conf-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .conf-bar{height:4px;background:var(--border);border-radius:100px;margin-top:6px;overflow:hidden;min-width:100px}
+    .conf-bar-fill{height:100%;background:var(--accent);border-radius:100px}
+    .esc-badge{font-size:11px;background:var(--red-s);color:var(--red);border:1px solid var(--red);padding:2px 8px;border-radius:100px;margin-left:8px;font-weight:600}
+    .peer-chip{display:inline-block;font-size:11px;padding:3px 10px;border-radius:100px;margin-left:8px;font-weight:600}
+    .peer-chip.Market-wide{background:var(--green-s);color:var(--green)}
+    .peer-chip.Regional{background:var(--accent-s);color:var(--accent)}
+    .peer-chip.Outlier{background:var(--red-s);color:var(--red)}
+    .expl-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:16px 18px;margin-bottom:18px;font-size:14px;color:var(--text2);line-height:1.7}
+    .ptabs{display:flex;gap:6px;margin-bottom:16px}
+    .ptab{background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:var(--rs);padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+    .ptab:hover{border-color:var(--accent);color:var(--accent)}
+    .ptab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .sub-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+    .hyp-list{list-style:none}
+    .hyp-item{padding:12px 0;border-bottom:1px solid var(--border)}
+    .hyp-item:last-child{border-bottom:none}
+    .hyp-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:6px}
+    .hyp-cause{font-size:14px;font-weight:500}
+    .hyp-pct{font-size:14px;font-weight:600;color:var(--accent);white-space:nowrap;font-family:'JetBrains Mono',monospace}
+    .citations{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+    .citation{font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:4px}
+    .fb-btns{display:flex;gap:8px}
+    .fb-btns button{background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:4px;cursor:pointer;padding:4px 10px;font-size:12px;font-family:'Inter',sans-serif}
+    .fb-btns button:hover{border-color:var(--accent);color:var(--accent)}
+    .at{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+    .at th{text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:8px 10px;border-bottom:2px solid var(--border);white-space:nowrap}
+    .at td{padding:10px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+    .cpill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;white-space:nowrap}
+    .cpill.High{background:var(--green-s);color:var(--green)}.cpill.Medium{background:var(--accent-s);color:var(--accent)}.cpill.Low{background:var(--red-s);color:var(--red)}
+    .esc-box{background:var(--red-s);border:1px solid var(--red);border-radius:var(--rs);padding:16px 18px;margin:16px 0}
+    .esc-box h4{color:var(--red);font-size:13px;font-weight:600;margin-bottom:8px}
+    .esc-box ul{padding-left:18px}
+    .esc-box li{font-size:13px;margin-bottom:4px}
+    .ckpi-row{display:flex;gap:10px;overflow-x:auto;margin:14px 0}
+    .ckpi-item{min-width:130px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px}
+    .ckpi-item .name{font-size:11px;color:var(--muted);margin-bottom:4px}
+    .ckpi-item .val{font-size:14px;font-weight:600;font-family:'JetBrains Mono',monospace}
+    .wi-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:16px 18px;margin-top:20px}
+    .wi-box h3{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:12px}
+    .wi-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+    .wi-row label{font-size:12px;font-weight:600;color:var(--text2);display:flex;flex-direction:column;gap:4px}
+    .wi-row select,.wi-row input[type=number]{background:var(--surface);border:1px solid var(--border);padding:7px 10px;border-radius:var(--rs);font-size:13px;color:var(--text);outline:none;font-family:'Inter',sans-serif}
+    #wiResult{margin-top:12px;font-size:13px;color:var(--text2)}
+    .tel-row{display:flex;gap:20px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+    .ti{font-size:12px;color:var(--muted)}.ti b{color:var(--text);font-weight:600}
+
+    /* Glossary */
+    .glos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+    .glos-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh)}
+    .glos-item .term{font-size:13px;font-weight:600;margin-bottom:6px}
+    .glos-item .def{font-size:13px;color:var(--text2);line-height:1.6}
+
+    /* Custom KPI form */
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    @media(max-width:560px){.fg2{grid-template-columns:1fr}}
+    .fg{display:flex;flex-direction:column;gap:4px}
+    .fg label{font-size:12px;font-weight:600;color:var(--text2)}
+    .fg input{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:8px 10px;border-radius:var(--rs);font-size:13px;outline:none;font-family:'Inter',sans-serif}
+    .fg input:focus{border-color:var(--blue)}
+    .fhint{font-size:11px;color:var(--muted);margin-top:2px}
+
+    /* History */
+    .hist-list{list-style:none}
+    .hist-item{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px}
+    .hist-date{color:var(--muted);font-size:12px;min-width:120px;font-family:'JetBrains Mono',monospace}
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-title">ACCENTURE</div>
+      <div class="brand-subtitle">Business Intelligence</div>
+    </div>
+    <nav class="nav">
+      <a href="#" class="nav-item" data-target="overview" onclick="switchTab('overview', 'Overview', 'Data processing workflow & architecture')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        Overview
+      </a>
+      <a href="#" class="nav-item active" data-target="business-health" onclick="switchTab('business-health', 'Business Health', 'Business performance at a glance')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        Business Health
+      </a>
+      <a href="#" class="nav-item" data-target="analysis" onclick="switchTab('analysis', 'Analysis', 'Custom metric monitoring and deep dives')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        Analysis
+      </a>
+      <a href="#" class="nav-item" data-target="insights" onclick="switchTab('insights', 'Insights', 'Real-time market and macroeconomic intelligence')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"></path><path d="M10 18h4"></path><path d="M12 2v2"></path><path d="M12 14v4"></path><path d="M4 12h2"></path><path d="M18 12h2"></path><path d="M5.64 5.64l1.41 1.41"></path><path d="M16.95 16.95l1.41 1.41"></path><path d="M5.64 18.36l1.41-1.41"></path><path d="M16.95 7.05l1.41-1.41"></path><circle cx="12" cy="12" r="4"></circle></svg>
+        Insights
+      </a>
+      
+    </nav>
+  </aside>
+  <div class="main-content">
+    <!-- HEADER -->
+    <header class="app-hdr">
+      <div class="hdr-left">
+        <h1>Business Health</h1>
+        <div class="sub">Business performance at a glance</div>
+      </div>
+      <div class="hdr-right">
+        <div id="warningBanner" class="warn-banner">&#9888; Possible issue detected</div>
+        <select id="roleSelector" onchange="changeRole(this.value)">
+          <option value="EXECUTIVE">CEO / Executive view</option>
+          <option value="ANALYST">Analyst view</option>
+          <option value="OPERATIONS">Operations view</option>
+        </select>
+        <div class="live-status">
+          <span class="live-dot"></span> LIVE
+        </div>
+      </div>
+    </header>
+    
+    <div class="wrap">
+      <div id="tab-overview" class="tab-pane" style="display:none;">
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+          <h2 style="font-size: 20px; color: #F5F5F5; margin-bottom: 24px; font-weight: 600;">Data Processing Pipeline</h2>
+          
+          <div style="display: flex; flex-direction: column; gap: 32px; position: relative;">
+            <div style="position: absolute; left: 24px; top: 24px; bottom: 24px; width: 2px; background: var(--border);"></div>
+            
+            <div style="display: flex; gap: 24px; position: relative; z-index: 1;">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--accent);">1</div>
+              <div>
+                <h3 style="font-size: 16px; color: #F5F5F5; font-weight: 600; margin-bottom: 8px;">Data Ingestion &amp; Formatting</h3>
+                <p style="font-size: 14px; color: #A0A0A0; line-height: 1.6;">Raw data (CSV, unstructured text, or direct integrations) is parsed. The system automatically identifies metrics, values, and timestamps without requiring strict schema definitions.</p>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 24px; position: relative; z-index: 1;">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--accent);">2</div>
+              <div>
+                <h3 style="font-size: 16px; color: #F5F5F5; font-weight: 600; margin-bottom: 8px;">Anomaly Detection Gate</h3>
+                <p style="font-size: 14px; color: #A0A0A0; line-height: 1.6;">Time-series models scan the ingested metrics against historical baselines. Anomalies are flagged based on configurable primary and secondary z-score thresholds.</p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 24px; position: relative; z-index: 1;">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--accent);">3</div>
+              <div>
+                <h3 style="font-size: 16px; color: #F5F5F5; font-weight: 600; margin-bottom: 8px;">Cross-KPI Correlation Engine</h3>
+                <p style="font-size: 14px; color: #A0A0A0; line-height: 1.6;">When an anomaly is detected, the engine scans all other tracked KPIs for cascading effects, identifying leading and lagging indicators automatically.</p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 24px; position: relative; z-index: 1;">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--accent);">4</div>
+              <div>
+                <h3 style="font-size: 16px; color: #F5F5F5; font-weight: 600; margin-bottom: 8px;">LLM Synthesis &amp; Root Cause Analysis</h3>
+                <p style="font-size: 14px; color: #A0A0A0; line-height: 1.6;">The raw statistical evidence is passed to the selected AI Engine (e.g., Llama, Gemini, OpenAI). The LLM synthesizes the data into a plain-English narrative, scores confidence, and generates actionable hypotheses.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-business-health" class="tab-pane active">
+        <div id="inputView">
+          <!-- Settings -->
+          <div class="sc">
+            <div class="sr">
+              <div class="fld">
+                <div class="flbl">AI Engine</div>
+                <select id="backendSelector">
+                  <option value="mock">Demo Mode (no AI)</option>
+                  <option value="ollama" selected>Local Ollama</option>
+                  <option value="gemini">Google Gemini</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="anthropic">Anthropic</option>
+                  <option value="grok">xAI Grok</option>
+                </select>
+              </div>
+              <div class="fld" id="modelNameContainer">
+                <div class="flbl">Model Name</div>
+                <input type="text" id="modelInput" value="llama3:8b" style="width:150px">
+              </div>
+              <div class="fld" id="apiKeyLabel" style="display:none;">
+                <div class="flbl">API Key</div>
+                <input type="password" id="apiKeyInput" placeholder="Paste API key here" style="width:200px">
+              </div>
+            </div>
+          </div>
+
+          <!-- Magic AI Input -->
+          <div class="magic-card">
+            <h2>&#10024; Describe What Happened or Paste Any Data</h2>
+            <p class="magic-desc">Write a description in plain English, or paste <strong>ANY raw data (like CSV, Excel columns, or notes)</strong>. No specific columns or formatting are required—the AI will automatically extract the relevant metrics and find the root cause.</p>
+            <textarea id="magicInput" rows="4" placeholder="E.g., 'Sales dropped 20% in the North yesterday' or paste your raw CSV data here..."></textarea>
+            <div class="magic-footer">
+              <button class="btn btn-primary" onclick="runMagicAnalysis()">Analyse This Now</button>
+              <div id="magicTimer" class="magic-timer">
+                <span id="magicStatus" style="margin-right:8px;font-weight:600">Ready</span>
+                <span>Time: <span id="magicSeconds">0.0</span>s</span>
+              </div>
+            </div>
+            <div id="magicError" class="magic-error"></div>
+          </div>
+        </div>
+
+        <div id="outputView" style="display:none;">
+          <div style="margin-bottom: 24px;"><button class="btn btn-secondary" onclick="showInputView()">&#8592; Back to Home (Start New Analysis)</button></div>
+          
+          <div class="sec">
+            <div class="sec-hdr">
+              <h2 class="sec-title">Live Business Metrics</h2>
+              <span class="sec-desc">Real-time monitoring across all active KPIs.</span>
+            </div>
+            <div id="kpiGrid" class="kpi-grid"></div>
+          </div>
+
+          <div class="sec" id="detailPanel" style="margin-top: 32px;">
+            <!-- AI Output populates here -->
+          </div>
+          
+          <div class="sec" style="margin-top: 32px;">
+            <div class="sec-hdr"><h2 class="sec-title">Feedback History</h2></div>
+            <div class="card">
+              <ul id="historyList" class="hist-list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-analysis" class="tab-pane" style="display:none;">
+        <div class="sec" style="max-width: 800px; margin: 0 auto;">
+          <div class="sec-hdr">
+            <h2 class="sec-title">Add Your Own Metric to Monitor</h2>
+            <span class="sec-desc">Define custom metrics with dynamic mathematical formulas.</span>
+          </div>
+          <div class="card">
+            <div class="fg2">
+              <div class="fg">
+                <label>Metric Code</label>
+                <input type="text" id="ckId" placeholder="e.g., cac_ratio">
+              </div>
+              <div class="fg">
+                <label>Display Name</label>
+                <input type="text" id="ckName" placeholder="e.g., CAC Ratio">
+              </div>
+            </div>
+            <div class="fg" style="margin-bottom:14px">
+              <label>Formula (optional)</label>
+              <input type="text" id="ckFormula" placeholder="e.g., marketing_spend / new_customers">
+              <div class="fhint">Supports basic math and existing metric codes. Leave blank for direct data ingestion.</div>
+            </div>
+            <div class="fg2">
+              <div class="fg">
+                <label>Warning Threshold (%)</label>
+                <input type="number" id="ckWarn" placeholder="5" value="5">
+              </div>
+              <div class="fg">
+                <label>Critical Threshold (%)</label>
+                <input type="number" id="ckCrit" placeholder="15" value="15">
+              </div>
+            </div>
+            <div style="margin-top:20px;display:flex;align-items:center;gap:14px">
+              <button class="btn btn-primary" onclick="submitCustomKpi()">Create Metric</button>
+              <div id="ckResult" style="font-size:13px;font-weight:600"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-insights" class="tab-pane" style="display:none;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <div class="card" style="padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent);"></div>
+              <h3 style="font-size: 14px; font-weight: 600; color: #F5F5F5; text-transform: uppercase; letter-spacing: 0.05em;">Domain Intelligence</h3>
+            </div>
+            <div id="news-domain" style="display: flex; flex-direction: column; gap: 20px;"><div style="color:var(--muted);font-size:13px;">Fetching latest intelligence...</div></div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="card" style="padding: 24px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></div>
+                <h3 style="font-size: 14px; font-weight: 600; color: #F5F5F5; text-transform: uppercase; letter-spacing: 0.05em;">Macroeconomic</h3>
+              </div>
+              <div id="news-macro" style="display: flex; flex-direction: column; gap: 20px;"><div style="color:var(--muted);font-size:13px;">Fetching latest macroeconomic data...</div></div>
+            </div>
+
+            <div class="card" style="padding: 24px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #dc2626;"></div>
+                <h3 style="font-size: 14px; font-weight: 600; color: #F5F5F5; text-transform: uppercase; letter-spacing: 0.05em;">Company Specific</h3>
+              </div>
+              <div id="news-company" style="display: flex; flex-direction: column; gap: 20px;"><div style="color:var(--muted);font-size:13px;">Fetching latest company updates...</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+
+let newsLoaded = false;
+async function loadNews() {
+  if (newsLoaded) return;
+  try {
+    const res = await fetch('/news');
+    const data = await res.json();
+    
+    function renderNews(items) {
+      if (!items || items.length === 0) return '<div style="color:var(--muted);font-size:13px;">No news available at the moment.</div>';
+      return items.map(n => `
+        <div style="border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+          <a href="${n.link}" target="_blank" style="font-size: 14px; font-weight: 600; color: #F5F5F5; text-decoration: none; margin-bottom: 8px; display: block;">${n.title}</a>
+          <p style="font-size: 13px; color: #A0A0A0; line-height: 1.5; margin-bottom: 10px;">${n.overview}</p>
+          <div style="font-size: 11px; color: var(--accent); font-weight: 600;">Source: ${n.source} &bull; ${n.date}</div>
+        </div>
+      `).join('');
+    }
+    
+    document.getElementById('news-domain').innerHTML = renderNews(data.domain);
+    document.getElementById('news-macro').innerHTML = renderNews(data.macro);
+    document.getElementById('news-company').innerHTML = renderNews(data.company);
+    newsLoaded = true;
+  } catch (err) {
+    console.error('Failed to load news', err);
+    const errHtml = '<div style="color:var(--red);font-size:13px;">Failed to load live news feed.</div>';
+    document.getElementById('news-domain').innerHTML = errHtml;
+    document.getElementById('news-macro').innerHTML = errHtml;
+    document.getElementById('news-company').innerHTML = errHtml;
+  }
+}
+
+function switchTab(tabId, title, subtitle) {
+  if (tabId === 'insights') loadNews();
+  document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+  const target = document.getElementById('tab-' + tabId);
+  if (target) target.style.display = 'block';
+  
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const activeNav = document.querySelector(`.nav-item[data-target="${tabId}"]`);
+  if (activeNav) activeNav.classList.add('active');
+  
+  const titleEl = document.querySelector('.hdr-left h1');
+  const subEl = document.querySelector('.hdr-left .sub');
+  if (titleEl) titleEl.textContent = title;
+  if (subEl) subEl.textContent = subtitle;
+}
+document.addEventListener('keydown', e => {
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+  const ids=Object.keys(state.kpis),ci=ids.indexOf(state.selectedKpi);
+  if(e.key==='j'||e.key==='ArrowDown'){const n=ids[(ci+1)%ids.length];if(n)selectKpi(n);}
+  else if(e.key==='k'||e.key==='ArrowUp'){const p=ids[(ci-1+ids.length)%ids.length];if(p)selectKpi(p);}
+  else if(e.key==='1')changeRole('EXECUTIVE');
+  else if(e.key==='2')changeRole('ANALYST');
+  else if(e.key==='3')changeRole('OPERATIONS');
+  else if(e.key==='r'||e.key==='R')loadKpis();
+  else if(e.key==='Escape'){state.selectedKpi=null;document.getElementById('detailPanel').innerHTML='<div class="card"><div class="story-empty"><div class="ei">&#128269;</div><p>Select a metric card or use the AI input box above.</p></div></div>';}
+});
+
+
+function showInputView() {
+  document.getElementById('inputView').style.display = 'block';
+  document.getElementById('outputView').style.display = 'none';
+  document.getElementById('magicTimer').style.display = 'none';
+  document.getElementById('magicStatus').textContent = 'Ready';
+  document.getElementById('magicSeconds').textContent = '0.0';
+}
+function showOutputView() {
+  document.getElementById('inputView').style.display = 'none';
+  document.getElementById('outputView').style.display = 'block';
+}
+
+const state={kpis:{},kpiHistory:{},selectedKpi:null,activeRole:'EXECUTIVE',backend:'ollama',apiKey:'',lastStory:null,feedbackHistory:[],earlyWarnings:[],lastUpdated:null};
+
+document.getElementById('backendSelector').addEventListener('change',e=>{
+  state.backend=e.target.value;
+  document.getElementById('apiKeyLabel').style.display=['gemini','openai','anthropic','grok'].includes(state.backend)?'flex':'none';
+  
+  const modelContainer = document.getElementById('modelNameContainer');
+  const modelInput = document.getElementById('modelInput');
+  if(state.backend === 'mock') {
+    if(modelContainer) modelContainer.style.display = 'none';
+  } else {
+    if(modelContainer) modelContainer.style.display = 'flex';
+    const defaults = {
+      'ollama': 'llama3:8b',
+      'gemini': 'gemini-1.5-flash',
+      'openai': 'gpt-4o-mini',
+      'grok': 'grok-beta'
+    };
+    if (defaults[state.backend] && modelInput) {
+      modelInput.value = defaults[state.backend];
+    }
+  }
+});
+document.getElementById('apiKeyInput').addEventListener('input',e=>{state.apiKey=e.target.value;});
+
+function changeRole(role){
+  state.activeRole=role;
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('active',t.dataset.role===role));
+  if(state.lastStory)renderStory(state.lastStory);
+}
+
+let btt=null;
+function debounceBacktest(){clearTimeout(btt);btt=setTimeout(runBacktest,800);}
+async function runBacktest(){
+  const p=document.getElementById('primaryThresh')?.value||1.75,s=document.getElementById('secondaryThresh')?.value||3.0;
+  const el=document.getElementById('backtestResult');el.textContent='Calculating...';
+  try{
+    const r=await fetch(`/backtest?primary=${p}&secondary=${s}&days=180`).then(r=>r.json());
+    if(r.error)throw new Error(r.error);
+    el.textContent=`Accuracy: ${r.f1?(r.f1*100).toFixed(0)+'%':'--'} | False Alarms: ${r.false_alarm_rate?(r.false_alarm_rate*100).toFixed(0)+'%':'--'}`;
+    el.style.color=r.f1>0.5?'var(--green)':r.f1>0.3?'var(--accent)':'var(--red)';
+  }catch(e){el.textContent='Could not calculate';}
+}
+
+async function runNLQuery(){
+  const q=document.getElementById('nlQuery')?.value?.trim();if(!q)return;
+  const el=document.getElementById('nlResult');el.style.display='block';el.textContent='Searching...';
+  try{
+    const r=await fetch('/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,backend:state.backend})}).then(r=>r.json());
+    el.textContent=`Found: Metric=${r.parsed_kpi}, Location=${r.parsed_region}, Status=${r.kpi_status}`;
+    if(r.kpi_status==='anomaly'){el.textContent+=' — loading full analysis...';state.selectedKpi=r.parsed_kpi;selectKpi(r.parsed_kpi);}
+  }catch(e){el.textContent='Error: '+e.message;}
+}
+
+async function loadKpis(){
+  try{
+    const d=await fetch('/kpis').then(r=>r.json());
+    d.forEach(k=>{state.kpis[k.kpi_id]=k;});
+    for(const k of d){
+      if(k.status!=='insufficient_data'){
+        const h=await fetch('/kpis/'+k.kpi_id+'/history?days=14');
+        if(h.ok)state.kpiHistory[k.kpi_id]=await h.json();
+      }
+    }
+    state.earlyWarnings=d.filter(k=>k.early_warning);
+    state.lastUpdated=new Date().toLocaleTimeString();
+    renderHeader();renderGrid();
+    if(typeof renderHeatmap==='function')renderHeatmap();
+  }catch(e){console.error(e);}
+}
+
+async function loadHistory(){
+  try{const d=await fetch('/feedback/history?n=50').then(r=>r.json());state.feedbackHistory=d.records||[];renderHistory();}catch(e){}
+}
+
+async function submitFeedback(fbType,value,anomalyId,hypIdx){
+  try{await fetch('/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({feedback_type:fbType,value,anomaly_id:anomalyId,hypothesis_index:hypIdx,provider_role:state.activeRole})});loadHistory();}catch(e){}
+}
+
+function renderSparkline(hist){
+  if(!hist||!hist.values||!hist.values.length)return'';
+  const w=80,h=30,vals=hist.values,ub=hist.upper_bounds||vals,lb=hist.lower_bounds||vals;
+  const max=Math.max(...vals,...ub),min=Math.min(...vals,...lb),range=(max-min)||1;
+  const dx=w/(vals.length-1||1),getY=v=>h-((v-min)/range)*h;
+  let area='';
+  for(let i=0;i<vals.length-1;i++){if(vals[i]==null||vals[i+1]==null)continue;area+=`${i*dx},${getY(ub[i])} ${(i+1)*dx},${getY(ub[i+1])} ${(i+1)*dx},${getY(lb[i+1])} ${i*dx},${getY(lb[i])} `;}
+  let path='',first=true;
+  for(let i=0;i<vals.length;i++){if(vals[i]!=null){if(first){path+=`M ${i*dx} ${getY(vals[i])}`;first=false;}else{path+=` L ${i*dx} ${getY(vals[i])}`;} }}
+  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polygon points="${area}" fill="rgba(245,158,11,.08)"/><path d="${path}" fill="none" stroke="var(--muted)" stroke-width="1.5"/><circle cx="${(vals.length-1)*dx}" cy="${getY(vals[vals.length-1])}" r="2.5" fill="var(--accent)"/></svg>`;
+}
+
+function renderHeader(){
+  const b=document.getElementById('warningBanner');
+  if(state.earlyWarnings.length>0){b.style.display='flex';b.innerHTML=`&#9888; ${state.earlyWarnings[0].name} is trending toward a problem`;}
+  else b.style.display='none';
+  document.getElementById('lastUpdated').textContent='Last refresh: '+state.lastUpdated;
+}
+
+function renderHeatmap(){
+  const svg=document.getElementById('heatmapSvg');
+  if(!svg||!Object.keys(state.kpis).length)return;
+  const ids=Object.keys(state.kpis),regions=['Region X','Region Y','Region Z'];
+  const cW=100,cH=28,lW=80;
+  svg.setAttribute('viewBox',`0 0 ${lW+ids.length*cW} ${28+regions.length*cH}`);
+  let html='';
+  ids.forEach((id,ci)=>{html+=`<text x="${lW+ci*cW+cW/2}" y="18" text-anchor="middle" font-family="Inter" font-size="9" fill="#718096">${(state.kpis[id]?.name||id).split(' ').slice(-1)[0]}</text>`;});
+  regions.forEach((r,ri)=>{
+    html+=`<text x="${lW-4}" y="${28+ri*cH+cH/2+4}" text-anchor="end" font-family="Inter" font-size="9" fill="#718096">${r}</text>`;
+    ids.forEach((id,ci)=>{
+      const sev=ri===0?(state.kpis[id]?.severity_score||0):Math.random()*0.3,alpha=Math.min(sev,1);
+      const color=sev>0.7?`rgba(239,68,68,${alpha})`:sev>0.4?`rgba(245,158,11,${alpha})`:`rgba(16,185,129,${alpha*0.6})`;
+      const x=lW+ci*cW,y=28+ri*cH;
+      html+=`<rect x="${x+1}" y="${y+1}" width="${cW-2}" height="${cH-2}" rx="3" fill="${color}" opacity="0.85"/>`;
+      html+=`<text x="${x+cW/2}" y="${y+cH/2+4}" text-anchor="middle" font-family="Inter" font-size="9" fill="#fff" font-weight="600">${(sev*100).toFixed(0)}%</text>`;
+    });
+  });
+  svg.innerHTML=html;
+}
+
+function renderGrid(){
+  const grid=document.getElementById('kpiGrid');grid.innerHTML='';
+  const nm={'revenue_total':'Total Revenue &#128176;','units_sold':'Units Sold &#128230;','avg_price':'Avg. Selling Price &#127991;','marketing_spend':'Marketing Spend &#128226;','inventory_level':'Inventory Level &#127981;'};
+  Object.values(state.kpis).forEach(k=>{
+    const el=document.createElement('div');
+    el.className='kpi-card'+(k.kpi_id===state.selectedKpi?' active':'')+(k.status==='anomaly'?' has-anomaly':'')+(k.early_warning?' has-warning':'');
+    el.onclick=()=>selectKpi(k.kpi_id);
+    const spark=state.kpiHistory[k.kpi_id]&&!state.kpiHistory[k.kpi_id].error?renderSparkline(state.kpiHistory[k.kpi_id]):'';
+    const st=k.status==='insufficient_data'?'&#9898; Not enough data':k.status==='anomaly'?'&#128308; Problem detected &mdash; click!':'&#128994; All normal';
+    const bc=k.status==='anomaly'?'anomaly':'noise';
+    el.innerHTML=`<p class="kpi-name">${nm[k.kpi_id]||k.name}</p><p class="kpi-value">${k.value!==undefined?Number(k.value).toLocaleString():'--'}</p><span class="kpi-delta ${k.trend_direction||'flat'}">${k.delta_pct!==undefined?(k.delta_pct>0?'&#9650; ':'&#9660; ')+Math.abs(k.delta_pct)+'% vs expected':'--'}</span><br/><span class="kpi-badge ${bc}">${st}</span>${spark}`;
+    grid.appendChild(el);
+  });
+}
+
+async function selectKpi(kpiId){
+  state.selectedKpi=kpiId;renderGrid();
+  const k=state.kpis[kpiId];
+  if(!k||k.status!=='anomaly'){document.getElementById('detailPanel').innerHTML=`<div class="card"><div class="story-empty"><div class="ei">&#9989;</div><p><strong>${k?k.name:kpiId}</strong> is within its normal range. No problem detected right now.</p></div></div>`;return;}
+  document.getElementById('detailPanel').innerHTML=`<div class="card"><div class="story-empty"><div class="ei">&#128260;</div><p>Loading AI analysis for <strong>${k.name}</strong>...<br><small style="color:var(--muted)">This may take up to 2 minutes on local Ollama.</small></p></div></div>`;
+  try{
+    const payload={test_case:'live',kpi_id:kpiId,region:'Region X',backend:state.backend};
+    if(state.apiKey)payload.api_key=state.apiKey;
+    const data=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>r.json());
+    if(data.error){document.getElementById('detailPanel').innerHTML=`<div class="card"><div class="story-empty"><div class="ei">&#10060;</div><p><strong>Error:</strong> ${data.error}</p></div></div>`;return;}
+    if(data.verdict==='noise'){document.getElementById('detailPanel').innerHTML=`<div class="card"><div class="story-empty"><div class="ei">&#9989;</div><p>Deeper check confirms this is normal variation &mdash; no action needed.</p></div></div>`;return;}
+    state.lastStory=data;renderStory(data);
+  }catch(e){document.getElementById('detailPanel').innerHTML=`<div class="card"><div class="story-empty"><div class="ei">&#10060;</div><p>Could not fetch analysis: ${e.message}</p></div></div>`;}
+}
+
+function renderStory(data){
+  const detail=document.getElementById('detailPanel');
+  const s=data.original_story;
+  if(!s){detail.innerHTML=`<div class="card"><div class="story-empty"><p>No analysis data available.</p></div></div>`;return;}
+  let p=(data.persona_narratives&&data.persona_narratives[state.activeRole])||{headline:s.headline,explanation:s.explanation,escalate:s.escalate_flag,structured_actions:data.structured_actions};
+  const conf=Math.round((p.confidence||s.overall_confidence||0.5)*100);
+
+  let html=`<div class="card">
+  <div class="story-head">
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">&#129302; AI Summary</div>
+      <h3 class="story-headline">${p.headline}${p.escalate?'<span class="esc-badge">&#9888; Needs expert review</span>':''}${data.peer_benchmark?`<span class="peer-chip ${data.peer_benchmark}">${data.peer_benchmark==='Market-wide'?'&#127760; Market-wide issue':data.peer_benchmark==='Regional'?'&#128205; Regional issue':'&#128308; Outlier'}</span>`:''}</h3>
+    </div>
+    <div class="conf-block">
+      <div class="conf-num">${conf}%</div>
+      <div class="conf-lbl">AI Confidence <span class="tip" data-tip="How sure the AI is. Above 70% = confident. Below 50% = uncertain, verify manually.">?</span></div>
+      <div class="conf-bar"><div class="conf-bar-fill" style="width:${conf}%"></div></div>
+    </div>
+  </div>
+  <div class="ptabs">
+    <button class="ptab ${state.activeRole==='EXECUTIVE'?'active':''}" data-role="EXECUTIVE" onclick="changeRole('EXECUTIVE')">&#128084; Simple Summary</button>
+    <button class="ptab ${state.activeRole==='ANALYST'?'active':''}" data-role="ANALYST" onclick="changeRole('ANALYST')">&#128202; Detailed Analysis</button>
+    <button class="ptab ${state.activeRole==='OPERATIONS'?'active':''}" data-role="OPERATIONS" onclick="changeRole('OPERATIONS')">&#9881; Action Plan</button>
+  </div>
+  <div class="expl-box">${p.explanation}</div>`;
+
+  if(s.escalate_flag)html+=`<div class="esc-box"><h4>&#9888;&#65039; This needs a human expert to review it</h4><p style="font-size:13px;color:var(--text2);margin-bottom:8px">The AI found multiple conflicting explanations and cannot confidently pick one single cause.</p><ul><li>The top two possible explanations have very similar confidence scores</li><li>Recommended next step: Share this with your data science or analytics team</li></ul></div>`;
+
+  if(data.cross_kpi_cascade&&data.cross_kpi_cascade.length>0)html+=`<div class="sub-title">&#128279; Other Metrics Also Affected <span class="tip" data-tip="When one metric drops, it can pull related metrics down too. These also show unusual patterns at the same time.">?</span></div><div class="ckpi-row">${data.cross_kpi_cascade.map(c=>`<div class="ckpi-item"><div class="name">${c.kpi}</div><div class="val">${c.impact}</div></div>`).join('')}</div>`;
+
+  if(state.activeRole!=='EXECUTIVE')html+=`<div class="sub-title">&#129504; Possible Causes, Ranked by Likelihood <span class="tip" data-tip="The AI ranked multiple explanations by how well they fit the data. First = most likely. Click thumbs up/down to give feedback.">?</span></div><ul class="hyp-list">${s.hypotheses.map((h,idx)=>`<li class="hyp-item"><div class="hyp-row"><span class="hyp-cause">${idx+1}. ${h.cause}</span><span class="hyp-pct">${Math.round(h.confidence*100)}% likely</span></div><div class="citations">${h.citations.map(c=>`<span class="citation">${c}</span>`).join('')}</div><div class="fb-btns"><button onclick="submitFeedback('hypothesis_validity',5,'${data.anomaly_id||''}',${idx})">&#128077; Correct</button><button onclick="submitFeedback('hypothesis_validity',1,'${data.anomaly_id||''}',${idx})">&#128078; Wrong</button></div></li>`).join('')}</ul>`;
+
+  if(state.activeRole==='OPERATIONS'||state.activeRole==='ANALYST'){
+    const acts=p.structured_actions||data.structured_actions||[];
+    if(acts.length>0)html+=`<div class="sub-title">&#128203; Recommended Actions <span class="tip" data-tip="Specific steps to fix the problem. Shows what went wrong, what to change, who should act, and how confident the AI is.">?</span></div><table class="at"><thead><tr><th>What went wrong</th><th>What can be changed</th><th>Recommended action</th><th>Expected result</th><th>Who should act</th><th>Confidence</th></tr></thead><tbody>${acts.map(a=>`<tr><td>${a.driver}</td><td>${a.controllable_leverage}</td><td>${a.action}</td><td>${a.expected_impact}</td><td style="font-weight:600;color:var(--text)">${a.owner}</td><td><span class="cpill ${a.confidence}">${a.confidence}</span></td></tr>`).join('')}</tbody></table>`;
+  }
+
+  const drivers=(s.structured_drivers||s.hypotheses||[]).slice(0,3);
+  const dOpts=drivers.map(d=>`<option value="${d.driver||d.cause||''};${d.contribution_pct||0.15}">${d.driver||d.cause||'Unknown'}</option>`).join('');
+  html+=`<div class="wi-box"><h3>&#129514; What-If Simulator <span class="tip" data-tip="Test scenarios: 'What if marketing spend increases 10%? How would revenue change?' The AI estimates the impact.">?</span></h3><div class="wi-row"><label>If this factor changes:<select id="wiDriver" style="background:var(--surface);border:1px solid var(--border);padding:7px 10px;border-radius:var(--rs);font-size:13px;color:var(--text)">${dOpts||'<option value="avg_price;0.15">Average Price</option>'}</select></label><label>By how much (%):<input type="number" id="wiPct" value="-5" min="-50" max="50" style="width:80px"></label><button class="btn btn-secondary" onclick="runWhatIf()">Run Simulation</button></div><div id="wiResult"></div></div>`;
+
+  const tel=data.telemetry||{};
+  html+=`<div class="tel-row"><span class="ti">AI Engine: <b>${state.backend}</b></span><span class="ti">Method: <b>Maths + AI</b></span><span class="ti">Processing time: <b>${tel.latency_ms?(tel.latency_ms/1000).toFixed(1)+'s':'--'}</b></span><span class="ti">AI tokens: <b>${tel.llm_total_tokens_estimate||'--'}</b></span></div>`;
+  html+=`<div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px"><span style="font-size:12px;font-weight:600;color:var(--muted)">Data Trail (how the answer was reached)</span><button class="btn btn-secondary btn-sm" style="margin-left:10px" onclick="loadLineage('${data.kpi_id||state.selectedKpi}')">Show data trail</button><div id="lineagePanel" style="margin-top:10px"></div></div></div>`;
+  detail.innerHTML=html;
+}
+
+async function runWhatIf(){
+  const dv=document.getElementById('wiDriver')?.value||'avg_price;0.15',[driver]=dv.split(';');
+  const pct=parseFloat(document.getElementById('wiPct')?.value||-5)/100,kpi=state.kpis[state.selectedKpi]||{};
+  document.getElementById('wiResult').textContent='Simulating...';
+  try{
+    const r=await fetch('/whatif',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'simulate',driver,driver_change_pct:pct,target_kpi:state.selectedKpi||'revenue_total',current_kpi_value:kpi.value||85000})}).then(r=>r.json());
+    if(r.error)throw new Error(r.error);
+    const dir=r.predicted_kpi_change_pct>0?'&#9650;':'&#9660;',col=r.predicted_kpi_change_pct>0?'var(--green)':'var(--red)';
+    document.getElementById('wiResult').innerHTML=`If <b>${driver}</b> changes by <b>${(pct*100).toFixed(0)}%</b>: <span style="color:${col};font-weight:600">${dir} ${Math.abs(r.predicted_kpi_change_pct*100).toFixed(1)}%</span> &rarr; estimated: <b>${r.predicted_kpi_value?.toLocaleString()}</b>`;
+  }catch(e){document.getElementById('wiResult').textContent='Simulation error: '+e.message;}
+}
+
+async function loadLineage(kpiId){
+  const el=document.getElementById('lineagePanel');if(!el)return;
+  el.innerHTML='<p style="font-size:12px;color:var(--muted)">Loading...</p>';
+  try{
+    const r=await fetch(`/lineage/${kpiId}`).then(r=>r.json());
+    const rows=(r.lineage_chain||[]).map(s=>{
+      const tag=s.is_llm?'<span style="background:var(--accent-s);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">AI step</span>':'<span style="background:var(--green-s);color:var(--green);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">Math step</span>';
+      return `<tr><td style="color:var(--text)">${s.step}</td><td>${tag}</td><td style="color:var(--text2)">${s.method}</td></tr>`;
+    }).join('');
+    el.innerHTML=`<table style="width:100%;font-size:12px;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:6px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">Step</th><th style="text-align:left;padding:6px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">Type</th><th style="text-align:left;padding:6px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">Method</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }catch(e){el.innerHTML='<p style="color:var(--red);font-size:12px">Could not load data trail.</p>';}
+}
+
+function renderHistory(){
+  const list=document.getElementById('historyList');
+  if(!state.feedbackHistory.length){list.innerHTML='<li style="color:var(--muted);font-size:13px">No feedback yet. Use the thumbs up/down buttons after an analysis to give feedback.</li>';return;}
+  list.innerHTML=state.feedbackHistory.slice().reverse().map(r=>{
+    const stars='&#9733;'.repeat(r.value)+'&#9734;'.repeat(5-r.value);
+    return `<li class="hist-item"><span class="hist-date">${new Date(r.timestamp).toLocaleString()}</span><span style="color:var(--text2)">${r.feedback_type}</span><span style="color:var(--accent)">${stars}</span><span style="color:var(--muted)">${r.provider_role}</span></li>`;
+  }).join('');
+}
+
+async function submitCustomKpi(){
+  const payload={kpi_id:document.getElementById('ckId')?.value,name:document.getElementById('ckName')?.value,formula:document.getElementById('ckFormula')?.value,threshold_warning:parseFloat(document.getElementById('ckWarn')?.value||5)/100,threshold_critical:parseFloat(document.getElementById('ckWarn')?.value||5)/100*3};
+  if(!payload.kpi_id||!payload.name){document.getElementById('ckResult').textContent='Please fill in both the Code and Display Name.';return;}
+  try{
+    const r=await fetch('/kpi/define',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>r.json());
+    const el=document.getElementById('ckResult');
+    el.textContent=r.error?'Error: '+r.error:'&#9989; Added: '+r.name;
+    el.style.color=r.error?'var(--red)':'var(--green)';
+    if(!r.error)loadKpis();
+  }catch(e){document.getElementById('ckResult').textContent='Error: '+e.message;}
+}
+
+function uploadCSV(input){
+  if(!input.files||!input.files.length)return;
+  const fd=new FormData();fd.append('file',input.files[0]);
+  fetch('/upload',{method:'POST',body:fd})
+    .then(r=>r.json())
+    .then(d=>{if(d.error)alert('Upload failed: '+d.error);else{alert('Success! Added '+d.rows_added+' rows. Dashboard refreshing now.');loadKpis();}})
+    .catch(e=>alert('Upload error: '+e.message));
+  input.value='';
+}
+
+let magicInt=null;
+async function runMagicAnalysis(){
+  const raw=document.getElementById('magicInput').value.trim();
+  if(!raw){alert('Please write something in the text box first.');return;}
+  const tDiv=document.getElementById('magicTimer'),sSp=document.getElementById('magicStatus'),secSp=document.getElementById('magicSeconds'),errDiv=document.getElementById('magicError'),panel=document.getElementById('detailPanel');
+  errDiv.style.display='none';tDiv.style.display='flex';sSp.style.color='var(--muted)';
+  panel.innerHTML='<div class="card"><div class="story-empty"><div class="ei">&#129302;</div><p>AI is reading your input and running the analysis...<br><small style="color:var(--muted)">This can take 1-2 minutes on local Ollama. Please wait.</small></p></div></div>';
+  let sec=0;sSp.textContent='Step 1/2: Reading your input...';
+  if(magicInt)clearInterval(magicInt);
+  magicInt=setInterval(()=>{sec+=0.1;secSp.textContent=sec.toFixed(1);},100);
+  try{
+    const pl={raw_text:raw,backend:state.backend,model:document.getElementById('modelInput').value};
+    if(state.apiKey)pl.api_key=state.apiKey;
+    const fmt=await fetch('/format_input',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pl)}).then(r=>r.json());
+    if(fmt.error)throw new Error(fmt.error);
+    sSp.textContent='Step 2/2: Running causal analysis...';
+    const apl={test_case:'custom',backend:state.backend,model:pl.model,anomaly:fmt.anomaly,correlation:fmt.correlation,evidence:fmt.evidence};
+    if(state.apiKey)apl.api_key=state.apiKey;
+    const story=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(apl)}).then(r=>r.json());
+    if(story.error)throw new Error(story.error);
+    sSp.textContent='&#9989; Analysis complete!';sSp.style.color='var(--green)';
+    state.lastStory=story;renderStory(story);
+    showOutputView();
+  }catch(e){
+    sSp.textContent='&#10060; Failed';sSp.style.color='var(--red)';
+    let msg='Error: '+e.message;
+    if(e.message.includes('API key'))msg+=' Check your API key in the settings above.';
+    if(e.message.includes('ollama')||e.message.includes('connection'))msg+=' Make sure Ollama is running (run "ollama serve" in a terminal).';
+    errDiv.textContent=msg;errDiv.style.display='block';
+    panel.innerHTML='<div class="card"><div class="story-empty"><div class="ei">&#10060;</div><p>Analysis failed. See the error message above.</p></div></div>';
+  }finally{clearInterval(magicInt);}
+}
+
+function startLiveUpdates(){
+  if(typeof EventSource!=='undefined'){
+    const es=new EventSource('/stream/kpis');
+    es.onmessage=e=>{try{const k=JSON.parse(e.data);if(Array.isArray(k)){k.forEach(ki=>{state.kpis[ki.kpi_id]=ki;});state.lastUpdated=new Date().toLocaleTimeString();document.getElementById('lastUpdated').textContent='Last refresh: '+state.lastUpdated;renderGrid();if(typeof renderHeatmap==='function')renderHeatmap();}}catch(err){}};
+    es.onerror=()=>{es.close();setInterval(loadKpis,60000);};
+  }else{setInterval(loadKpis,60000);}
+}
+
+loadKpis();loadHistory();startLiveUpdates();
+</script>
+</body>
+</html>

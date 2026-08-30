@@ -1,0 +1,297 @@
+"""
+Action Enhancer - Transforms generic LLM-generated actions into structured
+recommendations following the format:
+driver → controllable lever → action → expected impact → owner → confidence → monitoring plan
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+from typing import List, Dict, Optional
+from dataclasses import dataclass
+
+# Add project root and task6 directory to path for imports
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+TASK6_DIR = Path(__file__).parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+if str(TASK6_DIR) not in sys.path:
+    sys.path.insert(0, str(TASK6_DIR))
+
+from schemas import Hypothesis, StructuredDriver, EvidenceSource
+from kpi_contract import KPIDefinition, DEFAULT_KPI_CONTRACT, DataSource, AccessLevel
+
+
+@dataclass
+class StructuredAction:
+    """A structured action recommendation following the prescribed format."""
+    driver: str                    # e.g., "avg_price", "marketing_spend"
+    controllable_leverage: str     # e.g., "pricing strategy", "promotional calendar"
+    action: str                    # Specific action to take
+    expected_impact: str           # Quantitative or qualitative expected outcome
+    owner: str                     # Role/person responsible
+    confidence: str                # High/Medium/Low based on hypothesis confidence
+    monitoring_plan: str           # How to track effectiveness
+
+    def to_string(self) -> str:
+        """Convert to readable string format."""
+        return f"{self.driver} → {action.controllable_leverage} → {self.action} → {self.expected_impact} → {self.owner} → {self.confidence} → {self.monitoring_plan}"
+
+
+class ActionEnhancer:
+    """Enhances generic actions into structured recommendations."""
+
+    def __init__(self):
+        self.kpi_contract = DEFAULT_KPI_CONTRACT
+
+        # Mapping from driver names to business context
+        self.driver_to_leverage = {
+            "avg_price": "pricing strategy",
+            "marketing_spend": "promotional calendar",
+            "inventory_level": "supply chain management",
+            "complaint_sentiment_score": "customer experience initiatives",
+            "revenue": "sales execution",
+            "units_sold": "inventory allocation"
+        }
+
+        # Mapping from driver names to typical owners
+        self.driver_to_owner = {
+            "avg_price": "VP of Pricing",
+            "marketing_spend": "Director of Marketing",
+            "inventory_level": "VP of Operations",
+            "complaint_sentiment_score": "Head of Customer Experience",
+            "revenue": "VP of Sales",
+            "units_sold": "Director of Sales Operations"
+        }
+
+        # Expected impact templates
+        self.impact_templates = {
+            "avg_price": "Expected {impact_pct}% change in revenue per unit",
+            "marketing_spend": "Expected {impact_pct}% change in customer acquisition",
+            "inventory_level": "Expected {impact_pct}% change in carrying costs",
+            "complaint_sentiment_score": "Expected {impact_pct}% change in customer retention",
+            "revenue": "Expected {impact_pct}% change in top-line growth",
+            "units_sold": "Expected {impact_pct}% change in market share"
+        }
+
+    def enhance_actions(
+        self,
+        hypotheses: List[Hypothesis],
+        correlation,
+        evidence,
+        anomaly
+    ) -> List[StructuredAction]:
+        """Enhance raw actions into structured recommendations."""
+        enhanced_actions = []
+
+        for hypothesis in hypotheses:
+            # Get the primary driver for this hypothesis (first citation that's a driver)
+            driver_id = self._extract_primary_driver(hypothesis.citations, hypothesis.cause)
+            if not driver_id:
+                continue
+
+            # Get hypothesis confidence level
+            conf_level = self._confidence_to_level(hypothesis.confidence)
+
+            # Generate structured action
+            structured_action = self._create_structured_action(
+                driver_id=driver_id,
+                hypothesis=hypothesis,
+                correlation=correlation,
+                evidence=evidence,
+                anomaly=anomaly,
+                confidence_level=conf_level
+            )
+
+            if structured_action:
+                enhanced_actions.append(structured_action)
+
+        return enhanced_actions
+
+    def _extract_primary_driver(self, citations: List[str], cause: str) -> Optional[str]:
+        """Extract the primary driver ID from citations or cause string."""
+        # First, try to get from citations
+        for citation in citations:
+            if citation.startswith("CorrelationResult."):
+                return citation.split("CorrelationResult.", 1)[-1]
+        # If not found in citations, try to get from cause string
+        # Look for patterns like "CorrelationResult.<driver_id>" in the cause
+        import re
+        matches = re.findall(r'CorrelationResult\.([a-zA-Z0-9_]+)', cause)
+        if matches:
+            # Return the first match
+            return matches[0]
+        return None
+
+    def _confidence_to_level(self, confidence: float) -> str:
+        """Convert numeric confidence to High/Medium/Low."""
+        if confidence >= 0.7:
+            return "High"
+        elif confidence >= 0.4:
+            return "Medium"
+        else:
+            return "Low"
+
+    def _create_structured_action(
+        self,
+        driver_id: str,
+        hypothesis: Hypothesis,
+        correlation,
+        evidence,
+        anomaly,
+        confidence_level: str
+    ) -> Optional[StructuredAction]:
+        """Create a single structured action."""
+
+        # Get driver label (human readable)
+        driver_label = self._get_driver_label(driver_id, correlation)
+        if not driver_label:
+            driver_label = driver_id.replace("_", " ")
+
+        # Get controllable leverage
+        controllable_leverage = self.driver_to_leverage.get(
+            driver_id,
+            f"{driver_id.replace('_', ' ')} management"
+        )
+
+        # Get owner
+        owner = self.driver_to_owner.get(
+            driver_id,
+            "Business Analyst"
+        )
+
+        # Generate action based on driver type and anomaly direction
+        action = self._generate_action(driver_id, hypothesis, anomaly)
+
+        # Generate expected impact
+        expected_impact = self._generate_expected_impact(
+            driver_id, hypothesis, anomaly, confidence_level
+        )
+
+        # Generate monitoring plan
+        monitoring_plan = self._generate_monitoring_plan(driver_id, hypothesis)
+
+        return StructuredAction(
+            driver=driver_label,
+            controllable_leverage=controllable_leverage,
+            action=action,
+            expected_impact=expected_impact,
+            owner=owner,
+            confidence=confidence_level,
+            monitoring_plan=monitoring_plan
+        )
+
+    def _get_driver_label(self, driver_id: str, correlation) -> Optional[str]:
+        """Get the human-readable label for a driver."""
+        for driver in correlation.drivers:
+            if driver.driver_id == driver_id:
+                return driver.label
+        return None
+
+    def _generate_action(self, driver_id: str, hypothesis: Hypothesis, anomaly) -> str:
+        """Generate a specific action based on driver and context."""
+        direction = "increase" if anomaly.direction == "increase" else "decrease"
+
+        action_templates = {
+            "avg_price": [
+                f"Review recent {direction} pricing changes against promotional calendar and competitor pricing",
+                f"Analyze price elasticity for {anomaly.entity} segment to optimize {direction} adjustment",
+                f"Coordinate with sales team to communicate {direction} pricing changes to key accounts"
+            ],
+            "marketing_spend": [
+                f"Review marketing channel allocation for {anomaly.entity} to optimize ROI",
+                f"Audit recent campaign performance to identify underperforming initiatives",
+                f"Reallocate budget from low-performing channels to high-ROI activities"
+            ],
+            "inventory_level": [
+                f"Review supply chain lead times and safety stock levels for {anomaly.entity}",
+                f"Analyze demand forecast accuracy and adjust reorder points",
+                f"Coordinate with procurement to adjust purchase orders based on current trends"
+            ],
+            "complaint_sentiment_score": [
+                f"Review recent customer feedback themes for {anomaly.entity} to identify root causes",
+                f"Escalate critical service issues to customer experience team for immediate resolution",
+                f"Implement targeted customer outreach program for affected segments"
+            ],
+            "revenue": [
+                f"Analyze sales pipeline velocity and conversion rates for {anomaly.entity}",
+                f"Review recent wins/losses to identify competitive or product-related factors",
+                f"Coordinate with sales leadership to adjust quotas or incentives if needed"
+            ],
+            "units_sold": [
+                f"Review inventory availability and fulfillment performance for {anomaly.entity}",
+                f"Analyze product mix shifts and identify fast/slow moving items",
+                f"Coordinate with marketing to align promotional activities with inventory levels"
+            ]
+        }
+
+        templates = action_templates.get(
+            driver_id,
+            [f"Investigate {driver_id} trends for {anomaly.entity} and recommend appropriate actions"]
+        )
+
+        # Select template based on hypothesis confidence to add sophistication
+        idx = min(len(templates) - 1, int(hypothesis.confidence * len(templates)))
+        return templates[idx]
+
+    def _generate_expected_impact(
+        self,
+        driver_id: str,
+        hypothesis: Hypothesis,
+        anomaly,
+        confidence_level: str
+    ) -> str:
+        """Generate expected impact statement."""
+        # Base impact percentage derived from anomaly magnitude and confidence
+        base_impact = abs(anomaly.magnitude_pct) * hypothesis.confidence
+
+        # Adjust based on confidence level
+        if confidence_level == "High":
+            impact_pct = base_impact * 0.8  # Expect to recover 80% of the anomaly
+        elif confidence_level == "Medium":
+            impact_pct = base_impact * 0.5  # Expect to recover 50% of the anomaly
+        else:
+            impact_pct = base_impact * 0.3  # Expect to recover 30% of the anomaly
+
+        impact_template = self.impact_templates.get(
+            driver_id,
+            f"Expected {impact_pct:.1f}% improvement in related metrics"
+        )
+
+        return impact_template.format(impact_pct=f"{impact_pct:.1f}")
+
+    def _generate_monitoring_plan(self, driver_id: str, hypothesis: Hypothesis) -> str:
+        """Generate monitoring plan for the action."""
+        frequency_map = {
+            "High": "daily",
+            "Medium": "weekly",
+            "Low": "bi-weekly"
+        }
+
+        conf_level = self._confidence_to_level(hypothesis.confidence)
+        frequency = frequency_map.get(conf_level, "weekly")
+
+        metric_map = {
+            "avg_price": "daily average selling price and sales volume",
+            "marketing_spend": "weekly marketing ROI and conversion rates",
+            "inventory_level": "daily inventory turns and stockout incidents",
+            "complaint_sentiment_score": "weekly customer satisfaction scores and complaint volume",
+            "revenue": "daily revenue and sales pipeline velocity",
+            "units_sold": "daily units sold and inventory availability"
+        }
+
+        metric = metric_map.get(driver_id, f"{driver_id} trends and related metrics")
+
+        return f"Monitor {metric} {frequency}; review in weekly business review"
+
+
+def enhance_story_output_actions(story_output, correlation, evidence, anomaly) -> List[StructuredAction]:
+    """Convenience function to enhance actions in a StoryOutput."""
+    enhancer = ActionEnhancer()
+    return enhancer.enhance_actions(
+        story_output.hypotheses,
+        correlation,
+        evidence,
+        anomaly
+    )

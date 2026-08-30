@@ -1,0 +1,19 @@
+{
+  "quick_mode": true,
+  "results": [
+    {
+      "primary_threshold": 1.75,
+      "secondary_threshold": 3.0,
+      "tp": 9,
+      "fp": 21,
+      "fn": 4,
+      "tn": 317,
+      "precision": 0.3,
+      "recall": 0.6923,
+      "f1": 0.4186,
+      "false_alarm_rate": 0.0621,
+      "total_days": 351,
+      "true_anomaly_days": 13
+    }
+  ]
+}

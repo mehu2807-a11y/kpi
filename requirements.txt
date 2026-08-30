@@ -1,0 +1,33 @@
+# Consolidated requirements for BusinessIntelligence.ai project
+# Combines requirements from all task directories
+
+# Core data science & ML libraries (from task4 & task2)
+pandas>=2.0
+numpy>=1.24
+scipy>=1.10
+statsmodels>=0.14
+xgboost>=2.0
+shap>=0.44
+matplotlib>=3.7
+prophet>=1.4.0
+
+# Task 5 specific
+scikit-learn>=1.3
+rank_bm25>=0.2.2
+
+# Task 6 specific (for Anthropic LLM client)
+anthropic>=0.40.0
+
+# HTTP clients for LLM integrations
+requests>=2.25.0
+
+# For running tests
+pytest>=7.0.0
+
+# Web dashboard (app.py)
+flask>=3.0
+flask-cors>=4.0
+
+# Scheduling
+schedule>=1.2.0
+gunicorn>=21.2.0

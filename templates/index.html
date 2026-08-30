@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusinessIntelligence.ai — Anomaly Explainer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #F5F4FB;
+            --surface: #FFFFFF;
+            --surface-border: #E6E3F5;
+            --ink: #1C1733;
+            --ink-soft: #4A4462;
+            --muted: #8A83A6;
+            --primary-1: #4F46E5;
+            --primary-2: #9333EA;
+            --primary-grad: linear-gradient(120deg, var(--primary-1), var(--primary-2));
+            --success-bg: #E9F9F1; --success-ink: #0C8F63; --success-border: #0C8F63;
+            --error-bg: #FDECEC; --error-ink: #D3352E; --error-border: #D3352E;
+            --warn-bg: #FEF3E2; --warn-ink: #B45309; --warn-border: #B45309;
+            --radius: 16px;
+            --radius-sm: 9px;
+            --shadow: 0 10px 30px rgba(31, 23, 82, 0.07);
+            --shadow-sm: 0 2px 8px rgba(31, 23, 82, 0.06);
+            --font-display: 'Space Grotesk', system-ui, sans-serif;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-body);
+            line-height: 1.6;
+            color: var(--ink-soft);
+            background: var(--bg);
+        }
+        .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
+
+        /* ---------- Header ---------- */
+        header.top {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 22px;
+        }
+        .brand-mark {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: var(--primary-grad);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        header.top h1 {
+            font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; color: var(--ink);
+        }
+        header.top p { font-size: 0.92rem; color: var(--muted); }
+
+        /* ---------- Step rail ---------- */
+        .rail {
+            display: flex; align-items: center; gap: 0;
+            margin-bottom: 28px;
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius);
+            padding: 6px;
+            box-shadow: var(--shadow-sm);
+        }
+        .rail-step {
+            flex: 1;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 10px;
+            border-radius: calc(var(--radius) - 6px);
+            font-family: var(--font-display); font-weight: 600; font-size: 0.85rem;
+            color: var(--muted);
+            cursor: default;
+            transition: background 0.2s, color 0.2s;
+        }
+        .rail-step .num {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: var(--bg); color: var(--muted);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; flex-shrink: 0;
+        }
+        .rail-step.active { color: var(--ink); }
+        .rail-step.active .num { background: var(--primary-grad); color: white; }
+        .rail-step.clickable { cursor: pointer; }
+        .rail-step.clickable:hover { background: var(--bg); }
+        .rail-divider { width: 28px; height: 1px; background: var(--surface-border); flex-shrink: 0; }
+
+        /* ---------- Views ---------- */
+        #resultsView { display: none; }
+
+        /* ---------- Cards / sections ---------- */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius);
+            padding: 26px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .panel h2 {
+            font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; color: var(--ink);
+            margin-bottom: 4px;
+        }
+        .panel .panel-sub { font-size: 0.88rem; color: var(--muted); margin-bottom: 18px; }
+
+        /* ---------- Backend card grid ---------- */
+        .backend-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+            margin-bottom: 18px;
+        }
+        .backend-card {
+            border: 1.5px solid var(--surface-border);
+            border-radius: var(--radius-sm);
+            padding: 14px 12px;
+            cursor: pointer;
+            text-align: left;
+            background: var(--surface);
+            transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+        }
+        .backend-card:hover { border-color: #C9C2ED; transform: translateY(-1px); }
+        .backend-card.selected {
+            border-color: var(--primary-1);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+        }
+        .backend-card .bc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .backend-card .bc-icon {
+            width: 26px; height: 26px; border-radius: 7px;
+            background: var(--bg); display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; flex-shrink: 0;
+        }
+        .backend-card.selected .bc-icon { background: var(--primary-grad); color: white; }
+        .backend-card .bc-name { font-family: var(--font-display); font-weight: 600; font-size: 0.9rem; color: var(--ink); }
+        .backend-card .bc-blurb { font-size: 0.76rem; color: var(--muted); line-height: 1.4; }
+
+        /* ---------- Config panel (dynamic per backend) ---------- */
+        .config-panel {
+            background: var(--bg);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-sm);
+            padding: 16px 18px;
+        }
+        .config-panel.empty { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 18px; }
+
+        /* ---------- Form basics ---------- */
+        .form-group { margin-bottom: 16px; }
+        .form-group:last-child { margin-bottom: 0; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; color: var(--ink); }
+        select, input[type=text], input[type=number], input[type=password], textarea {
+            width: 100%; padding: 11px 12px;
+            border: 1.5px solid var(--surface-border); border-radius: var(--radius-sm);
+            font-size: 0.92rem; font-family: var(--font-body);
+            background: var(--surface); color: var(--ink);
+            transition: border-color 0.15s;
+        }
+        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--primary-1); }
+        .key-row { display: flex; gap: 8px; }
+        .key-row input { flex: 1; }
+        .key-row button.toggle-visibility {
+            background: var(--surface); color: var(--ink-soft); border: 1.5px solid var(--surface-border);
+            padding: 0 14px; font-size: 0.8rem; font-weight: 600;
+        }
+        .config-note { font-size: 0.78rem; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+        .config-note a { color: var(--primary-1); }
+
+        button {
+            background: var(--primary-grad);
+            color: white; border: none;
+            padding: 13px 24px; font-size: 0.95rem; font-weight: 600;
+            border-radius: var(--radius-sm); cursor: pointer;
+            font-family: var(--font-body);
+            transition: transform 0.12s, box-shadow 0.12s;
+        }
+        button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(79,70,229,0.25); }
+        button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+        button.secondary {
+            background: var(--surface); color: var(--ink); border: 1.5px solid var(--surface-border);
+            box-shadow: none;
+        }
+        button.secondary:hover:not(:disabled) { border-color: #C9C2ED; box-shadow: none; }
+        button.full { width: 100%; }
+
+        /* ---------- Segmented toggle (sample vs custom) ---------- */
+        .segmented { display: flex; gap: 6px; background: var(--bg); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 18px; }
+        .segmented button {
+            flex: 1; background: transparent; color: var(--muted); box-shadow: none;
+            padding: 10px; font-size: 0.88rem;
+        }
+        .segmented button.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+        .segmented button:hover:not(.active):not(:disabled) { transform: none; box-shadow: none; color: var(--ink-soft); }
+
+        /* ---------- Sample case cards ---------- */
+        .sample-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+        .sample-card {
+            border: 1.5px solid var(--surface-border); border-radius: var(--radius-sm);
+            padding: 14px; cursor: pointer; background: var(--surface);
+        }
+        .sample-card.selected { border-color: var(--primary-1); box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+        .sample-card .sc-name { font-family: var(--font-display); font-weight: 600; font-size: 0.88rem; color: var(--ink); margin-bottom: 3px; }
+        .sample-card .sc-desc { font-size: 0.78rem; color: var(--muted); }
+
+        /* ---------- Input-method tabs ---------- */
+        .method-tabs { display: flex; gap: 6px; margin-bottom: 14px; border-bottom: 1.5px solid var(--surface-border); }
+        .method-tab {
+            background: transparent; color: var(--muted); box-shadow: none;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            padding: 10px 16px; font-size: 0.85rem;
+            border-bottom: 2px solid transparent; margin-bottom: -1.5px;
+        }
+        .method-tab.active { color: var(--primary-1); border-bottom-color: var(--primary-1); background: transparent; box-shadow: none; }
+        .method-tab:hover:not(.active) { transform: none; box-shadow: none; color: var(--ink-soft); }
+
+        .json-editor { font-family: var(--font-mono); font-size: 0.82rem; height: 220px; resize: vertical; }
+        .freeform-editor { font-family: var(--font-body); font-size: 0.9rem; height: 140px; resize: vertical; }
+
+        /* ---------- details / info panels ---------- */
+        details.info { background: var(--bg); border: 1px solid var(--surface-border); border-radius: var(--radius-sm); margin-bottom: 18px; }
+        details.info summary {
+            cursor: pointer; padding: 12px 16px; font-weight: 600; font-size: 0.85rem; color: var(--ink);
+            list-style: none; display: flex; align-items: center; gap: 8px;
+        }
+        details.info summary::-webkit-details-marker { display: none; }
+        details.info summary::before { content: '▸'; color: var(--primary-1); transition: transform 0.15s; font-size: 0.75rem; }
+        details.info[open] summary::before { transform: rotate(90deg); }
+        details.info .info-body { padding: 0 16px 16px; font-size: 0.85rem; color: var(--ink-soft); }
+        details.info .info-body p { margin-bottom: 10px; }
+        details.info .info-body p:last-child { margin-bottom: 0; }
+        details.info .info-body ul { margin: 0 0 10px 18px; }
+        details.info .info-body li { margin-bottom: 4px; }
+        details.info .info-body code { font-family: var(--font-mono); background: var(--surface); padding: 1px 5px; border-radius: 4px; font-size: 0.82em; }
+
+        /* ---------- Field group builder (form input method) ---------- */
+        .field-group { margin-bottom: 15px; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .input-row input, .input-row select { flex: 1; min-width: 120px; }
+        .row-card { border: 1px solid var(--surface-border); border-radius: var(--radius-sm); padding: 15px; margin-bottom: 10px; background: var(--bg); }
+        .row-card h4 { font-family: var(--font-display); font-size: 0.85rem; margin-bottom: 10px; color: var(--ink); }
+
+        /* ---------- Progress log ---------- */
+        #status, #formatStatus { margin-top: 14px; }
+        .log-line {
+            padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 8px;
+            font-size: 0.85rem; border-left: 3px solid transparent;
+        }
+        .log-line.loading { background: var(--bg); color: var(--ink-soft); font-style: italic; }
+        .log-line.success { background: var(--success-bg); color: var(--success-ink); border-left-color: var(--success-border); }
+        .log-line.error { background: var(--error-bg); color: var(--error-ink); border-left-color: var(--error-border); }
+
+        /* ---------- Results view ---------- */
+        .back-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+
+        .hero-card {
+            background: var(--surface); border: 1px solid var(--surface-border); border-radius: var(--radius);
+            padding: 26px; margin-bottom: 20px; box-shadow: var(--shadow-sm);
+        }
+        .hero-card .hero-headline { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+        .hero-card .hero-explanation { font-size: 0.92rem; color: var(--ink-soft); margin-bottom: 16px; }
+        .hero-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+        .hero-stat .hs-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 3px; }
+        .hero-stat .hs-value { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+        .hero-stat .hs-value.escalate-yes { color: var(--warn-ink); }
+        .hero-stat .hs-value.escalate-no { color: var(--success-ink); }
+
+        .card {
+            border: 1px solid var(--surface-border); border-radius: var(--radius-sm);
+            padding: 20px; background: var(--surface); margin-bottom: 16px; box-shadow: var(--shadow-sm);
+        }
+        .card > h3 { font-family: var(--font-display); font-size: 0.92rem; font-weight: 600; color: var(--ink); margin-bottom: 14px; }
+        .metric { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--bg); font-size: 0.85rem; }
+        .metric:last-child { border-bottom: none; }
+        .metric-label { color: var(--muted); flex-shrink: 0; }
+        .metric-value { font-family: var(--font-mono); color: var(--ink); text-align: right; }
+
+        .hyp-card { border: 1px solid var(--surface-border); border-radius: var(--radius-sm); padding: 16px; background: var(--bg); margin-bottom: 12px; }
+        .hyp-card:last-child { margin-bottom: 0; }
+        .hyp-card h4 { font-family: var(--font-display); font-size: 0.86rem; color: var(--ink); margin-bottom: 10px; }
+
+        .action-item { background: #F0EEFC; border-left: 3px solid var(--primary-1); padding: 12px 14px; margin-bottom: 10px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+        .action-item:last-child { margin-bottom: 0; }
+        .action-label { font-weight: 600; color: var(--ink); margin-bottom: 5px; font-size: 0.86rem; }
+        .action-details { font-size: 0.82rem; color: var(--ink-soft); }
+
+        .tab-container { border: 1px solid var(--surface-border); border-radius: var(--radius); overflow: hidden; background: var(--surface); margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+        .persona-tab-bar { display: flex; border-bottom: 1px solid var(--surface-border); }
+        .tab-button { flex: 1; background: var(--bg); color: var(--muted); border: none; box-shadow: none; padding: 13px; border-radius: 0; font-weight: 600; font-size: 0.85rem; }
+        .tab-button:hover:not(.active) { transform: none; box-shadow: none; background: var(--bg); }
+        .tab-button.active { background: var(--surface); color: var(--primary-1); }
+        .persona-tab { display: none; padding: 20px; }
+        .persona-tab.active { display: block; }
+        .persona-tab h3 { font-family: var(--font-display); font-size: 0.92rem; margin-bottom: 10px; color: var(--ink); }
+        .persona-tab p { font-size: 0.86rem; margin-bottom: 10px; }
+        .persona-tab h5 { font-size: 0.8rem; margin: 12px 0 8px; color: var(--ink); }
+
+        footer { text-align: center; margin-top: 30px; color: var(--muted); font-size: 0.8rem; }
+
+        @media (max-width: 720px) {
+            .backend-grid { grid-template-columns: repeat(2, 1fr); }
+            .sample-grid { grid-template-columns: 1fr; }
+            .hero-stats { gap: 16px; }
+            .rail-step span.label { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header class="top">
+            <div class="brand-mark">BI</div>
+            <div>
+                <h1>Anomaly Explainer</h1>
+                <p>Detect → Correlate → Synthesize, running against your data or the sample dataset</p>
+            </div>
+        </header>
+
+        <div class="rail" id="stepRail">
+            <div class="rail-step active clickable" id="railStep1" data-target="1">
+                <span class="num">1</span><span class="label">AI Backend</span>
+            </div>
+            <div class="rail-divider"></div>
+            <div class="rail-step clickable" id="railStep2" data-target="2">
+                <span class="num">2</span><span class="label">Your Data</span>
+            </div>
+            <div class="rail-divider"></div>
+            <div class="rail-step" id="railStep3" data-target="3">
+                <span class="num">3</span><span class="label">Results</span>
+            </div>
+        </div>
+
+        <!-- ================= INPUT VIEW ================= -->
+        <div id="inputView">
+
+            <div class="panel">
+                <h2>1 · Choose your AI backend</h2>
+                <p class="panel-sub">This model writes the plain-language explanation at the end. Everything else (detecting the anomaly, ranking causes) runs on statistics, not AI.</p>
+
+                <div class="backend-grid" id="backendGrid"></div>
+                <div class="config-panel" id="backendConfigPanel"></div>
+            </div>
+
+            <div class="panel">
+                <h2>2 · Provide your data</h2>
+                <p class="panel-sub">Run it against a ready-made example, or bring your own.</p>
+
+                <details class="info">
+                    <summary>What data does this need?</summary>
+                    <div class="info-body">
+                        <p>Every run needs three things:</p>
+                        <ul>
+                            <li><strong>The anomaly</strong> — which metric moved, by how much, and over what time window (e.g. "Region X revenue, down 7.5%, July 4–10").</li>
+                            <li><strong>Structured drivers</strong> — other numbers that moved around the same time and might explain it (price, marketing spend, inventory), ranked by how strongly they correlate.</li>
+                            <li><strong>Evidence</strong> — real-world context: news articles, support tickets, internal memos that speak to <em>why</em> it happened.</li>
+                        </ul>
+                        <p>You can provide this three ways: hand-write the exact JSON, use the guided form (no JSON knowledge needed), or paste anything you already have — notes, a CSV excerpt, an email — and let the AI reshape it into the right structure for you.</p>
+                    </div>
+                </details>
+
+                <div class="segmented">
+                    <button type="button" class="active" id="dataModeSampleBtn">Sample data</button>
+                    <button type="button" id="dataModeCustomBtn">Custom data</button>
+                </div>
+
+                <div id="samplePanel">
+                    <div class="sample-grid">
+                        <div class="sample-card selected" id="sampleEasyCard" data-case="easy">
+                            <div class="sc-name">Easy case</div>
+                            <div class="sc-desc">One clear cause, strong evidence. Good first run.</div>
+                        </div>
+                        <div class="sample-card" id="sampleHardCard" data-case="hard">
+                            <div class="sc-name">Hard case</div>
+                            <div class="sc-desc">Conflicting evidence — tests the escalation logic.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="customPanel" style="display:none;">
+                    <div class="method-tabs">
+                        <button type="button" class="method-tab active" data-method="json">Paste JSON</button>
+                        <button type="button" class="method-tab" data-method="form">Guided form</button>
+                        <button type="button" class="method-tab" data-method="freeform">Free-form (AI-formatted)</button>
+                    </div>
+
+                    <div id="jsonInputContainer">
+                        <div class="form-group">
+                            <label for="jsonInput">Paste your data as JSON:</label>
+                            <textarea id="jsonInput" class="json-editor" placeholder='{"anomaly": {...}, "correlation": {...}, "evidence": {...}}'></textarea>
+                        </div>
+                        <button type="button" class="secondary" id="validateJsonBtn">Validate JSON</button>
+                        <div id="jsonValidationStatus"></div>
+                    </div>
+
+                    <div id="formInputContainer" style="display:none;">
+                        <div class="form-group">
+                            <label>Anomaly</label>
+                            <div class="row-card">
+                                <div class="input-row">
+                                    <div style="flex:1;"><label for="anomalyId">Anomaly ID</label><input type="text" id="anomalyId" value="custom-case-001"></div>
+                                    <div style="flex:1;"><label for="metricName">Metric</label><input type="text" id="metricName" value="revenue"></div>
+                                </div>
+                                <div class="input-row">
+                                    <div style="flex:1;"><label for="entity">Entity / region</label><input type="text" id="entity" value="North Region"></div>
+                                    <div style="flex:1;"><label for="direction">Direction</label>
+                                        <select id="direction"><option value="increase">Increase</option><option value="decrease">Decrease</option></select>
+                                    </div>
+                                </div>
+                                <div class="input-row">
+                                    <div style="flex:1;"><label for="magnitudePct">Magnitude %</label><input type="number" id="magnitudePct" value="18.5" min="0" step="0.1"></div>
+                                    <div style="flex:1;"><label for="baselineValue">Baseline value</label><input type="number" id="baselineValue" value="2500000" step="0.01"></div>
+                                    <div style="flex:1;"><label for="observedValue">Observed value</label><input type="number" id="observedValue" value="2962500" step="0.01"></div>
+                                </div>
+                                <div class="input-row">
+                                    <div style="flex:1;"><label for="windowStart">Window start</label><input type="text" id="windowStart" value="2026-08-20"></div>
+                                    <div style="flex:1;"><label for="windowEnd">Window end</label><input type="text" id="windowEnd" value="2026-08-26"></div>
+                                    <div style="flex:1;"><label for="detectedAt">Detected at</label><input type="text" id="detectedAt" value="2026-08-27T09:00:00Z"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Correlation drivers</label>
+                            <div id="driversContainer"></div>
+                            <button type="button" class="secondary full" id="addDriverBtn">+ Add driver</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Evidence sources</label>
+                            <div id="sourcesContainer"></div>
+                            <button type="button" class="secondary full" id="addSourceBtn">+ Add source</button>
+                        </div>
+
+                        <button type="button" class="full" id="buildFromFormBtn" style="margin-top: 6px;">Build JSON from form</button>
+                        <div id="formValidationStatus"></div>
+                    </div>
+
+                    <div id="freeformInputContainer" style="display:none;">
+                        <div class="form-group">
+                            <label for="freeformInput">Paste anything — notes, a CSV excerpt, a support ticket, an email thread:</label>
+                            <textarea id="freeformInput" class="freeform-editor" placeholder="e.g. Region X revenue was down about 8% last week, July 4 to 10. We raised Product A's price 10% on July 4. Support also logged a few tickets about a competitor's promo running the same week..."></textarea>
+                        </div>
+                        <button type="button" class="secondary full" id="formatWithAiBtn">✨ Format with AI</button>
+                        <div id="formatStatus"></div>
+                        <p class="config-note" style="margin-top:10px;">This uses the AI backend you picked in step 1 to read your text and reshape it into the schema above — it does <strong>not</strong> run the full analysis. Review the JSON it produces (in the "Paste JSON" tab) before analyzing.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <button id="analyzeBtn" class="full">🔍 Analyze Anomaly</button>
+                <div id="status"></div>
+            </div>
+        </div>
+
+        <!-- ================= RESULTS VIEW ================= -->
+        <div id="resultsView">
+            <div class="back-row">
+                <button type="button" class="secondary" id="backToInputBtn">‹ New analysis</button>
+            </div>
+
+            <details class="info" open>
+                <summary>How to read these results</summary>
+                <div class="info-body">
+                    <ul>
+                        <li><strong>Confidence</strong> — how strongly the evidence supports the top explanation. It's computed from citation coverage and agreement across sources, not the AI's own self-rating.</li>
+                        <li><strong>Escalate</strong> — set to "Yes" when causes are close or evidence conflicts. Treat that as "verify before acting," not a final answer.</li>
+                        <li><strong>Hypotheses</strong> — ranked possible causes. Every one is required to cite specific drivers or sources it's based on — never an unsupported claim.</li>
+                        <li><strong>Structured actions</strong> — concrete next steps, each with an owner and a way to check if it worked.</li>
+                        <li><strong>Executive / Analyst / Operations tabs</strong> — the same finding, reworded for who's reading it.</li>
+                        <li><strong>Telemetry</strong> — the technical cost of this run: how many AI calls, tokens, estimated $ cost, and how long it took.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <div class="hero-card">
+                <div class="hero-headline" id="headline"></div>
+                <div class="hero-explanation" id="explanation"></div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="hs-label">Confidence</div><div class="hs-value" id="confidence"></div></div>
+                    <div class="hero-stat"><div class="hs-label">Escalate</div><div class="hs-value" id="escalate"></div></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Root cause hypotheses</h3>
+                <div id="hypotheses"></div>
+            </div>
+
+            <div class="card">
+                <h3>Structured actions</h3>
+                <div id="structuredActions"></div>
+            </div>
+
+            <div class="tab-container">
+                <div class="persona-tab-bar">
+                    <button class="tab-button active" data-tab="executive">Executive</button>
+                    <button class="tab-button" data-tab="analyst">Analyst</button>
+                    <button class="tab-button" data-tab="operations">Operations</button>
+                </div>
+                <div id="personaTabs">
+                    <div class="persona-tab active" id="executiveTab">
+                        <h3>Executive perspective</h3>
+                        <div id="executiveContent"></div>
+                    </div>
+                    <div class="persona-tab" id="analystTab">
+                        <h3>Analyst perspective</h3>
+                        <div id="analystContent"></div>
+                    </div>
+                    <div class="persona-tab" id="operationsTab">
+                        <h3>Operations perspective</h3>
+                        <div id="operationsContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Relevant KPI definitions</h3>
+                <div id="kpis"></div>
+            </div>
+
+            <div class="card">
+                <h3>Telemetry</h3>
+                <div id="telemetry"></div>
+            </div>
+        </div>
+
+        <footer>BusinessIntelligence.ai — local interface</footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // =========================================================
+            // Reusable live progress logger (used by both Analyze and
+            // Format-with-AI, so both get identical, tested behavior).
+            // =========================================================
+            function createProgressLogger(container) {
+                const entries = [];
+                let timer = null;
+                const elapsed = (from) => ((Date.now() - from) / 1000).toFixed(1) + 's';
+                const render = () => {
+                    container.innerHTML = entries.map(e => {
+                        const suffix = e.tLive ? ` \u2014 ${elapsed(e.tStart)} elapsed` : '';
+                        return `<div class="log-line ${e.cls}">${e.text}${suffix}</div>`;
+                    }).join('');
+                };
+                const log = (text, cls, tLive) => {
+                    const entry = { text, cls: cls || 'loading', tLive: !!tLive, tStart: Date.now() };
+                    entries.push(entry);
+                    render();
+                    return entry;
+                };
+                const start = () => { clearInterval(timer); timer = setInterval(render, 1000); };
+                const stop = () => clearInterval(timer);
+                return { log, render, start, stop };
+            }
+
+            // =========================================================
+            // Backend selection (Step 1)
+            // =========================================================
+            const BACKEND_INFO = {
+                mock:      { label: 'Mock',      icon: '\u{1F9EA}', blurb: 'No setup. Same canned response every time.', needsKey: false, needsModel: false },
+                ollama:    { label: 'Ollama',     icon: '\u{1F5A5}', blurb: 'Free, local. Needs Ollama running on this machine.', needsKey: false, needsModel: true, modelDefault: 'llama3:8b' },
+                anthropic: { label: 'Anthropic',  icon: '\u2726',    blurb: 'Claude models. Needs an API key.', needsKey: true, needsModel: true, modelDefault: 'claude-sonnet-5', keyLink: 'https://console.anthropic.com/settings/keys', keyLinkLabel: 'console.anthropic.com' },
+                openai:    { label: 'OpenAI',     icon: '\u25C7',    blurb: 'GPT models. Needs an API key.', needsKey: true, needsModel: true, modelDefault: 'gpt-5.4-mini', keyLink: 'https://platform.openai.com/api-keys', keyLinkLabel: 'platform.openai.com' },
+                gemini:    { label: 'Gemini',     icon: '\u2726',    blurb: "Google's models. Needs an API key.", needsKey: true, needsModel: true, modelDefault: 'gemini-flash-latest', keyLink: 'https://aistudio.google.com/apikey', keyLinkLabel: 'aistudio.google.com' },
+                grok:      { label: 'Grok',       icon: '\u2715',    blurb: "xAI's models. Needs an API key.", needsKey: true, needsModel: true, modelDefault: 'grok-beta', keyLink: 'https://console.x.ai', keyLinkLabel: 'console.x.ai' },
+            };
+            const BACKEND_ORDER = ['mock', 'ollama', 'anthropic', 'openai', 'gemini', 'grok'];
+
+            let selectedBackend = 'ollama';
+            const savedKeys = {};    // in-memory only, per backend, never persisted
+            const savedModels = {};  // in-memory only, per backend
+
+            const backendGrid = document.getElementById('backendGrid');
+            const backendConfigPanel = document.getElementById('backendConfigPanel');
+
+            function renderBackendGrid() {
+                backendGrid.innerHTML = BACKEND_ORDER.map(key => {
+                    const info = BACKEND_INFO[key];
+                    const sel = key === selectedBackend ? ' selected' : '';
+                    return `<div class="backend-card${sel}" data-backend="${key}">
+                        <div class="bc-top"><div class="bc-icon">${info.icon}</div><div class="bc-name">${info.label}</div></div>
+                        <div class="bc-blurb">${info.blurb}</div>
+                    </div>`;
+                }).join('');
+                backendGrid.querySelectorAll('.backend-card').forEach(card => {
+                    card.addEventListener('click', () => selectBackend(card.getAttribute('data-backend')));
+                });
+            }
+
+            function renderBackendConfig() {
+                const info = BACKEND_INFO[selectedBackend];
+                if (!info.needsKey && !info.needsModel) {
+                    backendConfigPanel.innerHTML = `<div class="empty">Nothing else to configure \u2014 Mock always returns the same example story, useful for testing the interface itself, not for real analysis.</div>`;
+                    return;
+                }
+                let html = '';
+                if (info.needsKey) {
+                    const savedKey = savedKeys[selectedBackend] || '';
+                    html += `
+                        <div class="form-group">
+                            <label for="apiKeyInput">${info.label} API key</label>
+                            <div class="key-row">
+                                <input type="password" id="apiKeyInput" placeholder="Paste your ${info.label} API key" value="${savedKey.replace(/"/g, '&quot;')}">
+                                <button type="button" class="secondary toggle-visibility" id="toggleKeyVisibility">Show</button>
+                            </div>
+                            <div class="config-note">Get one at <a href="${info.keyLink}" target="_blank" rel="noopener">${info.keyLinkLabel}</a>. Sent only to your local server for this request \u2014 never stored or logged.</div>
+                        </div>`;
+                }
+                if (info.needsModel) {
+                    const savedModel = savedModels[selectedBackend] || info.modelDefault;
+                    html += `
+                        <div class="form-group">
+                            <label for="modelInput">Model</label>
+                            <input type="text" id="modelInput" placeholder="${info.modelDefault}" value="${savedModel}">
+                            ${selectedBackend === 'ollama'
+                                ? `<div class="config-note">Must be pulled locally first: <code>ollama pull ${info.modelDefault}</code>, then <code>ollama serve</code> running. Local inference can take 1\u20135+ minutes per request.</div>`
+                                : `<div class="config-note">Model names change over time \u2014 edit this if your account uses a different one.</div>`}
+                        </div>`;
+                }
+                backendConfigPanel.innerHTML = html;
+
+                if (info.needsKey) {
+                    const keyInput = document.getElementById('apiKeyInput');
+                    keyInput.addEventListener('input', () => { savedKeys[selectedBackend] = keyInput.value; });
+                    document.getElementById('toggleKeyVisibility').addEventListener('click', function() {
+                        const showing = keyInput.type === 'text';
+                        keyInput.type = showing ? 'password' : 'text';
+                        this.textContent = showing ? 'Show' : 'Hide';
+                    });
+                }
+                if (info.needsModel) {
+                    const modelInput = document.getElementById('modelInput');
+                    modelInput.addEventListener('input', () => { savedModels[selectedBackend] = modelInput.value; });
+                }
+            }
+
+            function selectBackend(key) {
+                selectedBackend = key;
+                renderBackendGrid();
+                renderBackendConfig();
+            }
+
+            function getCurrentModel() {
+                const el = document.getElementById('modelInput');
+                return el ? el.value.trim() : '';
+            }
+            function getCurrentApiKey() {
+                const el = document.getElementById('apiKeyInput');
+                return el ? el.value.trim() : '';
+            }
+
+            renderBackendGrid();
+            renderBackendConfig();
+
+            // =========================================================
+            // Data source (Step 2): sample vs custom
+            // =========================================================
+            const dataModeSampleBtn = document.getElementById('dataModeSampleBtn');
+            const dataModeCustomBtn = document.getElementById('dataModeCustomBtn');
+            const samplePanel = document.getElementById('samplePanel');
+            const customPanel = document.getElementById('customPanel');
+            let dataMode = 'sample'; // 'sample' | 'custom'
+            let selectedSampleCase = 'easy'; // 'easy' | 'hard'
+
+            dataModeSampleBtn.addEventListener('click', () => setDataMode('sample'));
+            dataModeCustomBtn.addEventListener('click', () => setDataMode('custom'));
+            function setDataMode(mode) {
+                dataMode = mode;
+                dataModeSampleBtn.classList.toggle('active', mode === 'sample');
+                dataModeCustomBtn.classList.toggle('active', mode === 'custom');
+                samplePanel.style.display = mode === 'sample' ? 'block' : 'none';
+                customPanel.style.display = mode === 'custom' ? 'block' : 'none';
+            }
+
+            const sampleEasyCard = document.getElementById('sampleEasyCard');
+            const sampleHardCard = document.getElementById('sampleHardCard');
+            sampleEasyCard.addEventListener('click', () => selectSampleCase('easy'));
+            sampleHardCard.addEventListener('click', () => selectSampleCase('hard'));
+            function selectSampleCase(which) {
+                selectedSampleCase = which;
+                sampleEasyCard.classList.toggle('selected', which === 'easy');
+                sampleHardCard.classList.toggle('selected', which === 'hard');
+            }
+
+            function getCurrentTestCase() {
+                return dataMode === 'sample' ? selectedSampleCase : 'custom';
+            }
+
+            // =========================================================
+            // Custom input method tabs: JSON / Form / Free-form
+            // =========================================================
+            const jsonInputContainer = document.getElementById('jsonInputContainer');
+            const formInputContainer = document.getElementById('formInputContainer');
+            const freeformInputContainer = document.getElementById('freeformInputContainer');
+            const methodTabs = document.querySelectorAll('.method-tab');
+
+            function switchInputMethod(method) {
+                methodTabs.forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-method') === method));
+                jsonInputContainer.style.display = method === 'json' ? 'block' : 'none';
+                formInputContainer.style.display = method === 'form' ? 'block' : 'none';
+                freeformInputContainer.style.display = method === 'freeform' ? 'block' : 'none';
+            }
+            methodTabs.forEach(btn => {
+                btn.addEventListener('click', () => switchInputMethod(btn.getAttribute('data-method')));
+            });
+            function getCurrentInputMethod() {
+                const active = document.querySelector('.method-tab.active');
+                return active ? active.getAttribute('data-method') : 'json';
+            }
+
+            // =========================================================
+            // Persona tab switching (results view)
+            // =========================================================
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    document.querySelectorAll('.persona-tab').forEach(tab => tab.classList.remove('active'));
+                    document.getElementById(this.getAttribute('data-tab') + 'Tab').classList.add('active');
+                });
+            });
+
+            // =========================================================
+            // View switching: input <-> results
+            // =========================================================
+            const inputView = document.getElementById('inputView');
+            const resultsView = document.getElementById('resultsView');
+            const railStep1 = document.getElementById('railStep1');
+            const railStep2 = document.getElementById('railStep2');
+            const railStep3 = document.getElementById('railStep3');
+
+            function showInputView() {
+                inputView.style.display = 'block';
+                resultsView.style.display = 'none';
+                railStep1.classList.add('active');
+                railStep2.classList.remove('active');
+                railStep3.classList.remove('active');
+                railStep3.classList.remove('clickable');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            function showResultsView() {
+                inputView.style.display = 'none';
+                resultsView.style.display = 'block';
+                railStep1.classList.remove('active');
+                railStep2.classList.remove('active');
+                railStep3.classList.add('active', 'clickable');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            railStep1.addEventListener('click', showInputView);
+            railStep2.addEventListener('click', showInputView);
+            document.getElementById('backToInputBtn').addEventListener('click', showInputView);
+
+            // =========================================================
+            // Analyze button
+            // =========================================================
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const statusDiv = document.getElementById('status');
+            const resultsSectionsReady = true; // kept for clarity of intent, no-op
+
+            analyzeBtn.addEventListener('click', async function() {
+                analyzeBtn.disabled = true;
+                analyzeBtn.textContent = '\u{1F504} Analyzing...';
+
+                const progress = createProgressLogger(statusDiv);
+                progress.start();
+
+                try {
+                    const testCase = getCurrentTestCase();
+                    const backend = selectedBackend;
+                    const backendInfo = BACKEND_INFO[backend];
+                    const model = backendInfo.needsModel ? getCurrentModel() : '';
+                    const apiKey = backendInfo.needsKey ? getCurrentApiKey() : '';
+
+                    if (backendInfo.needsModel && !model) {
+                        throw new Error(`No model name entered for ${backendInfo.label}. Fill in the "Model" field in step 1.`);
+                    }
+                    if (backendInfo.needsKey && !apiKey) {
+                        throw new Error(`No ${backendInfo.label} API key entered. Fill in the API key field in step 1, or switch to Mock/Ollama.`);
+                    }
+
+                    let anomaly, correlation, evidence;
+
+                    if (testCase === 'easy' || testCase === 'hard') {
+                        const stepLabel = testCase === 'easy' ? 'Easy case' : 'Hard case';
+                        const stepEntry = progress.log(`\u23F3 Loading "${stepLabel}" sample data\u2026`, 'loading', true);
+                        let response;
+                        try {
+                            response = await fetch('/get_test_case', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ case_name: testCase })
+                            });
+                        } catch (netErr) {
+                            throw new Error(`Could not reach the server at /get_test_case. Is "python app.py" still running? (${netErr.message})`);
+                        }
+                        stepEntry.tLive = false;
+                        if (!response.ok) {
+                            let msg = `Server returned HTTP ${response.status} loading the test case.`;
+                            try { const j = await response.json(); if (j.error) msg = j.error; } catch (_) {}
+                            stepEntry.text = `\u274C Failed loading "${stepLabel}" sample data`;
+                            stepEntry.cls = 'error';
+                            progress.render();
+                            throw new Error(msg);
+                        }
+                        const data = await response.json();
+                        anomaly = data.anomaly; correlation = data.correlation; evidence = data.evidence;
+                        stepEntry.text = `\u2705 Loaded "${stepLabel}" sample data`;
+                        stepEntry.cls = 'success';
+                        progress.render();
+                    } else {
+                        const inputMethod = getCurrentInputMethod();
+                        if (inputMethod === 'json' || inputMethod === 'freeform') {
+                            const jsonText = document.getElementById('jsonInput').value.trim();
+                            if (!jsonText) {
+                                throw new Error(inputMethod === 'freeform'
+                                    ? 'Nothing to analyze yet \u2014 click "Format with AI" first, or switch to "Paste JSON" / "Guided form".'
+                                    : 'Please enter JSON data, or switch to the guided form / free-form tab.');
+                            }
+                            let parsed;
+                            try { parsed = JSON.parse(jsonText); }
+                            catch (parseErr) { throw new Error(`Your custom JSON isn't valid: ${parseErr.message}`); }
+                            anomaly = parsed.anomaly; correlation = parsed.correlation; evidence = parsed.evidence;
+                            if (!anomaly || !correlation || !evidence) {
+                                throw new Error('Custom JSON must include "anomaly", "correlation", and "evidence" keys.');
+                            }
+                            progress.log('\u2705 Parsed custom JSON input', 'success');
+                        } else if (inputMethod === 'form') {
+                            anomaly = buildAnomalyFromForm();
+                            correlation = buildCorrelationFromForm();
+                            evidence = buildEvidenceFromForm();
+                            progress.log('\u2705 Built input from form fields', 'success');
+                        }
+                    }
+
+                    const requestData = { test_case: testCase, backend: backend };
+                    if (backendInfo.needsModel) requestData.model = model;
+                    if (backendInfo.needsKey) requestData.api_key = apiKey;
+                    if (testCase === 'custom') {
+                        requestData.anomaly = anomaly;
+                        requestData.correlation = correlation;
+                        requestData.evidence = evidence;
+                    }
+
+                    const backendLabel = backendInfo.needsModel ? `${backendInfo.label} (model: ${model})` : backendInfo.label;
+                    const analyzeEntry = progress.log(
+                        `\u23F3 Sending to /analyze using ${backendLabel}\u2026` +
+                        (backend === 'ollama' ? ' local CPU inference can take 1\u20135+ minutes, especially on the first request while the model loads into memory \u2014 this is normal, just wait.' : ''),
+                        'loading', true
+                    );
+
+                    let response;
+                    try {
+                        response = await fetch('/analyze', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestData)
+                        });
+                    } catch (netErr) {
+                        analyzeEntry.tLive = false; analyzeEntry.text = '\u274C Could not reach the server'; analyzeEntry.cls = 'error';
+                        progress.render();
+                        throw new Error(`Request to /analyze failed \u2014 is "python app.py" still running in its terminal? (${netErr.message})`);
+                    }
+                    analyzeEntry.tLive = false;
+
+                    let result;
+                    try { result = await response.json(); }
+                    catch (parseErr) {
+                        analyzeEntry.text = '\u274C Server returned something that wasn\'t valid JSON'; analyzeEntry.cls = 'error';
+                        progress.render();
+                        throw new Error(`Couldn't parse the server's response (HTTP ${response.status}). Check the terminal running "python app.py" for the real error.`);
+                    }
+
+                    if (!response.ok) {
+                        analyzeEntry.text = `\u274C /analyze failed (HTTP ${response.status})`; analyzeEntry.cls = 'error';
+                        progress.render();
+                        throw new Error(result.error || `Unknown server error (HTTP ${response.status})`);
+                    }
+
+                    analyzeEntry.text = `\u2705 Got a response from ${backendLabel} in ${((Date.now() - analyzeEntry.tStart)/1000).toFixed(1)}s`;
+                    analyzeEntry.cls = 'success';
+                    progress.render();
+
+                    progress.log('\u23F3 Rendering results\u2026', 'loading');
+                    displayResults(result);
+                    progress.log('\u2705 Analysis complete', 'success');
+                    showResultsView();
+
+                } catch (error) {
+                    progress.log(`\u274C Error: ${error.message}`, 'error');
+                    console.error(error);
+                } finally {
+                    progress.stop();
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.textContent = '\u{1F50D} Analyze Anomaly';
+                }
+            });
+
+            // =========================================================
+            // Validate JSON button
+            // =========================================================
+            document.getElementById('validateJsonBtn').addEventListener('click', function() {
+                const jsonValidationStatus = document.getElementById('jsonValidationStatus');
+                const jsonText = document.getElementById('jsonInput').value.trim();
+                if (!jsonText) {
+                    jsonValidationStatus.innerHTML = '<div class="log-line error">Please enter JSON data</div>';
+                    return;
+                }
+                try {
+                    const parsed = JSON.parse(jsonText);
+                    if (!parsed.anomaly || !parsed.correlation || !parsed.evidence) {
+                        throw new Error('JSON must contain "anomaly", "correlation", and "evidence" objects');
+                    }
+                    jsonValidationStatus.innerHTML = '<div class="log-line success">\u2705 Valid JSON structure</div>';
+                } catch (error) {
+                    jsonValidationStatus.innerHTML = `<div class="log-line error">\u274C Invalid JSON: ${error.message}</div>`;
+                }
+            });
+
+            // =========================================================
+            // Format with AI (free-form input method)
+            // =========================================================
+            const formatWithAiBtn = document.getElementById('formatWithAiBtn');
+            const formatStatus = document.getElementById('formatStatus');
+            formatWithAiBtn.addEventListener('click', async function() {
+                const rawText = document.getElementById('freeformInput').value.trim();
+                const progress = createProgressLogger(formatStatus);
+
+                if (!rawText) {
+                    progress.log('Paste some data above first.', 'error');
+                    return;
+                }
+                if (selectedBackend === 'mock') {
+                    progress.log('Free-form formatting needs a real AI backend \u2014 pick Ollama or an API-key backend in step 1 first.', 'error');
+                    return;
+                }
+                const backendInfo = BACKEND_INFO[selectedBackend];
+                const model = backendInfo.needsModel ? getCurrentModel() : '';
+                const apiKey = backendInfo.needsKey ? getCurrentApiKey() : '';
+                if (backendInfo.needsKey && !apiKey) {
+                    progress.log(`No ${backendInfo.label} API key entered. Fill it in at the top of step 1.`, 'error');
+                    return;
+                }
+
+                formatWithAiBtn.disabled = true;
+                formatWithAiBtn.textContent = 'Formatting\u2026';
+                progress.start();
+                const entry = progress.log('\u23F3 Sending your input to the AI to reshape\u2026', 'loading', true);
+
+                try {
+                    const payload = { raw_text: rawText, backend: selectedBackend };
+                    if (backendInfo.needsModel) payload.model = model;
+                    if (backendInfo.needsKey) payload.api_key = apiKey;
+
+                    let response;
+                    try {
+                        response = await fetch('/format_input', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    } catch (netErr) {
+                        entry.tLive = false; entry.text = '\u274C Could not reach the server'; entry.cls = 'error';
+                        progress.render();
+                        throw new Error(`Request failed \u2014 is "python app.py" still running? (${netErr.message})`);
+                    }
+                    entry.tLive = false;
+
+                    let result;
+                    try { result = await response.json(); }
+                    catch (e) {
+                        entry.text = '\u274C Server returned something that was not valid JSON'; entry.cls = 'error';
+                        progress.render();
+                        throw new Error(`Couldn't parse the server's response (HTTP ${response.status}).`);
+                    }
+
+                    if (!response.ok) {
+                        entry.text = `\u274C Formatting failed (HTTP ${response.status})`; entry.cls = 'error';
+                        progress.render();
+                        throw new Error(result.error || `Unknown server error (HTTP ${response.status})`);
+                    }
+
+                    entry.text = '\u2705 AI formatted your input'; entry.cls = 'success';
+                    progress.render();
+
+                    document.getElementById('jsonInput').value = JSON.stringify(result, null, 2);
+                    switchInputMethod('json');
+                    progress.log('\u2705 Review the JSON below, then click "Analyze Anomaly" below \u2014 nothing has been analyzed yet.', 'success');
+
+                } catch (error) {
+                    progress.log(`\u274C ${error.message}`, 'error');
+                } finally {
+                    progress.stop();
+                    formatWithAiBtn.disabled = false;
+                    formatWithAiBtn.textContent = '\u2728 Format with AI';
+                }
+            });
+
+            // =========================================================
+            // Guided form: add driver / add source rows
+            // =========================================================
+            const driversContainer = document.getElementById('driversContainer');
+            const sourcesContainer = document.getElementById('sourcesContainer');
+            const addDriverBtn = document.getElementById('addDriverBtn');
+            const addSourceBtn = document.getElementById('addSourceBtn');
+
+            addDriverBtn.addEventListener('click', function() {
+                const i = driversContainer.children.length;
+                const div = document.createElement('div');
+                div.className = 'field-group';
+                div.innerHTML = `
+                    <div class="row-card">
+                        <h4>Driver ${i + 1}</h4>
+                        <div class="input-row">
+                            <div style="flex:1;"><label for="driverId_${i}">Driver ID</label><input type="text" id="driverId_${i}" value="driver_${i}"></div>
+                            <div style="flex:1;"><label for="driverStatType_${i}">Stat type</label>
+                                <select id="driverStatType_${i}"><option value="correlation">Correlation</option><option value="shap">SHAP</option></select>
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div style="flex:1;"><label for="driverLabel_${i}">Label</label><input type="text" id="driverLabel_${i}" value="Driver ${i + 1} description"></div>
+                        </div>
+                        <div class="input-row">
+                            <div style="flex:1;"><label for="driverValue_${i}">Value</label><input type="number" id="driverValue_${i}" value="0.5" step="0.01"></div>
+                            <div style="flex:1;"><label for="driverRank_${i}">Rank</label><input type="number" id="driverRank_${i}" value="${i + 1}" min="1"></div>
+                        </div>
+                        <button type="button" class="secondary" onclick="this.parentElement.parentElement.remove()" style="padding:6px 12px; font-size:0.78rem;">Remove</button>
+                    </div>`;
+                driversContainer.appendChild(div);
+            });
+
+            addSourceBtn.addEventListener('click', function() {
+                const i = sourcesContainer.children.length;
+                const div = document.createElement('div');
+                div.className = 'field-group';
+                div.innerHTML = `
+                    <div class="row-card">
+                        <h4>Source ${i + 1}</h4>
+                        <div class="input-row">
+                            <div style="flex:1;"><label for="sourceId_${i}">Source ID</label><input type="text" id="sourceId_${i}" value="source_${i}"></div>
+                            <div style="flex:1;"><label for="sourcePublisher_${i}">Publisher</label><input type="text" id="sourcePublisher_${i}" value="Publisher ${i + 1}"></div>
+                        </div>
+                        <div class="input-row">
+                            <div style="flex:1;"><label for="sourceTitle_${i}">Title</label><input type="text" id="sourceTitle_${i}" value="Document ${i + 1} title"></div>
+                        </div>
+                        <div class="input-row">
+                            <div style="flex:1;"><label for="sourceSnippet_${i}">Snippet</label><input type="text" id="sourceSnippet_${i}" value="Relevant text excerpt..."></div>
+                        </div>
+                        <div class="input-row">
+                            <div style="flex:1;"><label for="sourceDate_${i}">Date</label><input type="text" id="sourceDate_${i}" value="2026-08-20"></div>
+                            <div style="flex:1;"><label for="sourceRelevance_${i}">Relevance</label><input type="number" id="sourceRelevance_${i}" value="0.7" min="0" max="1" step="0.01"></div>
+                            <div style="flex:1;"><label for="sourceRank_${i}">Rank</label><input type="number" id="sourceRank_${i}" value="${i + 1}" min="1"></div>
+                        </div>
+                        <button type="button" class="secondary" onclick="this.parentElement.parentElement.remove()" style="padding:6px 12px; font-size:0.78rem;">Remove</button>
+                    </div>`;
+                sourcesContainer.appendChild(div);
+            });
+
+            document.getElementById('buildFromFormBtn').addEventListener('click', function() {
+                const formValidationStatus = document.getElementById('formValidationStatus');
+                try {
+                    const anomaly = buildAnomalyFromForm();
+                    const correlation = buildCorrelationFromForm();
+                    const evidence = buildEvidenceFromForm();
+                    document.getElementById('jsonInput').value = JSON.stringify({ anomaly, correlation, evidence }, null, 2);
+                    formValidationStatus.innerHTML = '<div class="log-line success">\u2705 JSON built. Switch to "Paste JSON" tab to view/edit.</div>';
+                } catch (error) {
+                    formValidationStatus.innerHTML = `<div class="log-line error">\u274C Error building JSON: ${error.message}</div>`;
+                }
+            });
+
+            // Seed one driver + one source row on load
+            addDriverBtn.click();
+            addSourceBtn.click();
+        });
+
+        // =========================================================
+        // Form -> object builders (used by the guided form tab)
+        // =========================================================
+        function buildAnomalyFromForm() {
+            return {
+                anomaly_id: document.getElementById('anomalyId').value.trim() || 'custom-case-001',
+                metric_name: document.getElementById('metricName').value.trim() || 'revenue',
+                entity: document.getElementById('entity').value.trim() || 'North Region',
+                direction: document.getElementById('direction').value,
+                magnitude_pct: parseFloat(document.getElementById('magnitudePct').value) || 0,
+                baseline_value: parseFloat(document.getElementById('baselineValue').value) || 0,
+                observed_value: parseFloat(document.getElementById('observedValue').value) || 0,
+                window_start: document.getElementById('windowStart').value.trim() || '2026-08-20',
+                window_end: document.getElementById('windowEnd').value.trim() || '2026-08-26',
+                detected_at: document.getElementById('detectedAt').value.trim() || '2026-08-27T09:00:00Z'
+            };
+        }
+
+        function buildCorrelationFromForm() {
+            const driversContainer = document.getElementById('driversContainer');
+            const drivers = [];
+            driversContainer.querySelectorAll('.field-group').forEach((element, index) => {
+                const driverId = element.querySelector(`#driverId_${index}`)?.value.trim() || `driver_${index}`;
+                const label = element.querySelector(`#driverLabel_${index}`)?.value.trim() || `Driver ${index + 1}`;
+                const statType = element.querySelector(`#driverStatType_${index}`)?.value || 'correlation';
+                const value = parseFloat(element.querySelector(`#driverValue_${index}`)?.value) || 0;
+                const rank = parseInt(element.querySelector(`#driverRank_${index}`)?.value) || index + 1;
+                drivers.push({ driver_id: driverId, label: label, stat_type: statType, value: value, rank: rank });
+            });
+            drivers.sort((a, b) => a.rank - b.rank);
+            return {
+                anomaly_id: document.getElementById('anomalyId').value.trim() || 'custom-case-001',
+                drivers: drivers
+            };
+        }
+
+        function buildEvidenceFromForm() {
+            const sourcesContainer = document.getElementById('sourcesContainer');
+            const sources = [];
+            sourcesContainer.querySelectorAll('.field-group').forEach((element, index) => {
+                const sourceId = element.querySelector(`#sourceId_${index}`)?.value.trim() || `source_${index}`;
+                const title = element.querySelector(`#sourceTitle_${index}`)?.value.trim() || `Document ${index + 1}`;
+                const snippet = element.querySelector(`#sourceSnippet_${index}`)?.value.trim() || `Text excerpt...`;
+                const publisher = element.querySelector(`#sourcePublisher_${index}`)?.value.trim() || `Publisher ${index + 1}`;
+                const date = element.querySelector(`#sourceDate_${index}`)?.value.trim() || '2026-08-20';
+                const relevance = parseFloat(element.querySelector(`#sourceRelevance_${index}`)?.value) || 0.5;
+                const rank = parseInt(element.querySelector(`#sourceRank_${index}`)?.value) || index + 1;
+                sources.push({ source_id: sourceId, title: title, snippet: snippet, publisher: publisher, date: date, relevance_score: relevance, rank: rank });
+            });
+            sources.sort((a, b) => a.rank - b.rank);
+            return {
+                anomaly_id: document.getElementById('anomalyId').value.trim() || 'custom-case-001',
+                sources: sources
+            };
+        }
+
+        // =========================================================
+        // Render the /analyze response into the results view
+        // =========================================================
+        function displayResults(data) {
+            document.getElementById('headline').textContent = data.original_story.headline;
+            document.getElementById('explanation').textContent = data.original_story.explanation;
+            document.getElementById('confidence').textContent = (data.original_story.overall_confidence * 100).toFixed(1) + '%';
+            const escalateEl = document.getElementById('escalate');
+            escalateEl.textContent = data.original_story.escalate_flag ? 'Yes' : 'No';
+            escalateEl.className = 'hs-value ' + (data.original_story.escalate_flag ? 'escalate-yes' : 'escalate-no');
+
+            const hypothesesDiv = document.getElementById('hypotheses');
+            hypothesesDiv.innerHTML = '';
+            data.original_story.hypotheses.forEach((h, index) => {
+                const hypEl = document.createElement('div');
+                hypEl.className = 'hyp-card';
+                hypEl.innerHTML = `
+                    <h4>Hypothesis ${index + 1}: ${h.cause}</h4>
+                    <div class="metric"><span class="metric-label">Confidence</span><span class="metric-value">${(h.confidence * 100).toFixed(1)}%</span></div>
+                    <div class="metric"><span class="metric-label">Citations</span><span class="metric-value">${h.citations.join(', ')}</span></div>
+                    <div class="metric"><span class="metric-label">Actions</span><span class="metric-value">${h.actions.length} action(s)</span></div>
+                `;
+                hypothesesDiv.appendChild(hypEl);
+            });
+
+            const actionsDiv = document.getElementById('structuredActions');
+            actionsDiv.innerHTML = '';
+            data.structured_actions.forEach(action => {
+                const actionEl = document.createElement('div');
+                actionEl.className = 'action-item';
+                actionEl.innerHTML = `
+                    <div class="action-label">${action.driver} \u2192 ${action.controllable_leverage} \u2192 ${action.action}</div>
+                    <div class="action-details">
+                        <strong>Impact:</strong> ${action.expected_impact}<br>
+                        <strong>Owner:</strong> ${action.owner}<br>
+                        <strong>Confidence:</strong> ${action.confidence}<br>
+                        <strong>Monitoring:</strong> ${action.monitoring_plan}
+                    </div>
+                `;
+                actionsDiv.appendChild(actionEl);
+            });
+
+            const personas = ['executive', 'analyst', 'operations'];
+            personas.forEach(persona => {
+                const tabDiv = document.getElementById(`${persona}Content`);
+                const personaData = data.persona_narratives[persona.toUpperCase()];
+                tabDiv.innerHTML = `
+                    <p>${personaData.explanation}</p>
+                    ${personaData.notes ? `<p><em>${personaData.notes}</em></p>` : ''}
+                    ${personaData.structured_actions && personaData.structured_actions.length > 0 ?
+                        `<h5>Recommended actions</h5>` +
+                        personaData.structured_actions.map(a =>
+                            `<div class="action-item">
+                                <div class="action-label">${a.driver} \u2192 ${a.controllable_leverage} \u2192 ${a.action}</div>
+                                <div class="action-details">
+                                    <strong>Impact:</strong> ${a.expected_impact}<br>
+                                    <strong>Owner:</strong> ${a.owner}<br>
+                                    <strong>Confidence:</strong> ${a.confidence}<br>
+                                    <strong>Monitoring:</strong> ${a.monitoring_plan}
+                                </div>
+                            </div>`).join('') : ''}
+                `;
+            });
+
+            const kpisDiv = document.getElementById('kpis');
+            if (data.relevant_kpis.length > 0) {
+                kpisDiv.innerHTML = data.relevant_kpis.map(kpi => `
+                    <div class="metric"><span class="metric-label">${kpi.name} (${kpi.kpi_id})</span><span class="metric-value">${kpi.formula}</span></div>
+                    <div class="metric"><span class="metric-label">Owner</span><span class="metric-value">${kpi.owner}</span></div>
+                    <div class="metric"><span class="metric-label">Access</span><span class="metric-value">${kpi.access_level}</span></div>
+                `).join('');
+            } else {
+                kpisDiv.innerHTML = '<p><em>No relevant KPIs found for this analysis.</em></p>';
+            }
+
+            const telemetryDiv = document.getElementById('telemetry');
+            telemetryDiv.innerHTML = `
+                <div class="metric"><span class="metric-label">Processing latency</span><span class="metric-value">${data.telemetry.processing_latency_ms?.toFixed(2) || 'N/A'} ms</span></div>
+                <div class="metric"><span class="metric-label">LLM calls</span><span class="metric-value">${data.telemetry.llm_calls || 0}</span></div>
+                <div class="metric"><span class="metric-label">Estimated tokens</span><span class="metric-value">${data.telemetry.llm_total_tokens_estimate || 0}</span></div>
+                <div class="metric"><span class="metric-label">Estimated cost</span><span class="metric-value">$${(data.telemetry.estimated_cost_usd || 0).toFixed(6)}</span></div>
+                <div class="metric"><span class="metric-label">Evidence quality</span><span class="metric-value">${(data.telemetry.evidence_quality_score || 0).toFixed(2)}</span></div>
+                <div class="metric"><span class="metric-label">Driver concentration</span><span class="metric-value">${(data.telemetry.driver_strength_concentration || 0).toFixed(2)}</span></div>
+            `;
+        }
+    </script>
+</body>
+</html>

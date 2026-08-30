@@ -1,0 +1,125 @@
+{
+  "MetricsTable_sample": [
+    {
+      "date": "2026-06-15",
+      "region": "Region X",
+      "product": "ALL",
+      "metric_name": "marketing_spend",
+      "value": 6104.56
+    },
+    {
+      "date": "2026-06-15",
+      "region": "Region X",
+      "product": "Product A",
+      "metric_name": "avg_price",
+      "value": 55.7971
+    },
+    {
+      "date": "2026-06-15",
+      "region": "Region X",
+      "product": "Product A",
+      "metric_name": "inventory_level",
+      "value": 6983.0
+    },
+    {
+      "date": "2026-06-15",
+      "region": "Region X",
+      "product": "Product A",
+      "metric_name": "revenue",
+      "value": 69411.61
+    },
+    {
+      "date": "2026-06-15",
+      "region": "Region X",
+      "product": "Product A",
+      "metric_name": "units_sold",
+      "value": 1244.0
+    },
+    {
+      "date": "2026-06-15",
+      "region": "Region X",
+      "product": "Product B",
+      "metric_name": "avg_price",
+      "value": 82.8694
+    },
+    {
+      "date": "2026-06-15",
+      "region": "Region X",
+      "product": "Product B",
+      "metric_name": "inventory_level",
+      "value": 3598.0
+    },
+    {
+      "date": "2026-06-15",
+      "region": "Region X",
+      "product": "Product B",
+      "metric_name": "revenue",
+      "value": 53202.13
+    }
+  ],
+  "DocumentStore_sample": [
+    {
+      "doc_id": "ticket_00001",
+      "date": "2026-06-15",
+      "source": "support_ticket",
+      "region_tags": [],
+      "entity_tags": [
+        "Product B"
+      ],
+      "sentiment_score": 0.0,
+      "raw_text": "Requesting an invoice copy for a recent Product B purchase."
+    },
+    {
+      "doc_id": "ticket_00002",
+      "date": "2026-06-15",
+      "source": "support_ticket",
+      "region_tags": [
+        "Region Z"
+      ],
+      "entity_tags": [
+        "Product A"
+      ],
+      "sentiment_score": -1.0,
+      "raw_text": "Really disappointed with Product A in Region Z -- it crashed twice this week and support was slow to respond."
+    },
+    {
+      "doc_id": "news_00003",
+      "date": "2026-06-15",
+      "source": "Bloomberg",
+      "region_tags": [
+        "Region Y"
+      ],
+      "entity_tags": [
+        "RivalWorks"
+      ],
+      "sentiment_score": 0.0,
+      "raw_text": "RivalWorks is expanding its Region Y distribution network, adding new retail partnerships."
+    },
+    {
+      "doc_id": "ticket_00004",
+      "date": "2026-06-16",
+      "source": "support_ticket",
+      "region_tags": [
+        "Region Z"
+      ],
+      "entity_tags": [
+        "Product A"
+      ],
+      "sentiment_score": -1.0,
+      "raw_text": "Really disappointed with Product A in Region Z -- it crashed twice this week and support was slow to respond."
+    },
+    {
+      "doc_id": "news_00005",
+      "date": "2026-06-16",
+      "source": "TechDaily",
+      "region_tags": [
+        "Region X"
+      ],
+      "entity_tags": [
+        "RivalWorks"
+      ],
+      "sentiment_score": 0.0,
+      "raw_text": "RivalWorks is expanding its Region X distribution network, adding new retail partnerships."
+    }
+  ]
+}

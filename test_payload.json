@@ -1,0 +1,74 @@
+{
+  "test_case": "custom",
+  "backend": "mock",
+  "anomaly": {
+    "anomaly_id": "rev-spike-2026-Q3-north",
+    "metric_name": "revenue",
+    "entity": "North Region",
+    "direction": "increase",
+    "magnitude_pct": 22.3,
+    "baseline_value": 3200000,
+    "observed_value": 3913600,
+    "window_start": "2026-07-01",
+    "window_end": "2026-07-31",
+    "detected_at": "2026-08-01T08:00:00Z"
+  },
+  "correlation": {
+    "anomaly_id": "rev-spike-2026-Q3-north",
+    "drivers": [
+      {
+        "driver_id": "price_increase_product_b",
+        "label": "12% price increase on Product B effective July 1",
+        "stat_type": "correlation",
+        "value": 0.68,
+        "rank": 1
+      },
+      {
+        "driver_id": "marketing_campaign_summer",
+        "label": "Summer marketing campaign launch June 15",
+        "stat_type": "correlation",
+        "value": 0.42,
+        "rank": 2
+      },
+      {
+        "driver_id": "inventory_improvement",
+        "label": "Reduced stockouts from improved supply chain",
+        "stat_type": "shap",
+        "value": 0.51,
+        "rank": 3
+      }
+    ]
+  },
+  "evidence": {
+    "anomaly_id": "rev-spike-2026-Q3-north",
+    "sources": [
+      {
+        "source_id": "pricing_00452",
+        "title": "Pricing Strategy Review - June 2026",
+        "snippet": "Approved 12% price increase on Product B to improve margin profile, effective July 1, 2026",
+        "publisher": "Corporate Pricing Office",
+        "date": "2026-06-28",
+        "relevance_score": 0.91,
+        "rank": 1
+      },
+      {
+        "source_id": "marketing_00887",
+        "title": "Summer Campaign Performance Report",
+        "snippet": "Q3 summer campaign drove 18% increase in qualified leads in North Region markets",
+        "publisher": "Marketing Analytics",
+        "date": "2026-07-20",
+        "relevance_score": 0.76,
+        "rank": 2
+      },
+      {
+        "source_id": "supply_00331",
+        "title": "Logistics Performance - July 2026",
+        "snippet": "On-time delivery improved to 96.5%, reducing stockout incidents by 34%",
+        "publisher": "Supply Chain Operations",
+        "date": "2026-07-25",
+        "relevance_score": 0.63,
+        "rank": 3
+      }
+    ]
+  }
+}

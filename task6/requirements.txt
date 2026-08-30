@@ -1,0 +1,4 @@
+# Only required to run AnthropicLLMClient (llm_client.py). schemas.py,
+# mock_data.py, scoring.py, synthesize.py, demo.py, and test_synthesize.py
+# are pure standard library and need nothing installed.
+anthropic>=0.40.0
