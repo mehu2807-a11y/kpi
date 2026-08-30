@@ -3,7 +3,7 @@ Simple Flask web interface for BusinessIntelligence.ai
 Connects to your fixed Task 6 backend
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_cors import CORS
 import json
 import sys
@@ -268,8 +268,7 @@ def get_llm_client(backend, model=None, api_key=None):
 
 @app.route('/')
 def index():
-    """Serve the main HTML page"""
-    return render_template('index.html')
+    return redirect(url_for('dashboard'))
 
 @app.route('/get_test_case', methods=['POST'])
 def get_test_case():
