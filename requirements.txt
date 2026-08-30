@@ -31,3 +31,4 @@ flask-cors>=4.0
 # Scheduling
 schedule>=1.2.0
 gunicorn>=21.2.0
+waitress>=3.0.0

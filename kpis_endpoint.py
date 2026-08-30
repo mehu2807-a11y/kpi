@@ -108,7 +108,7 @@ def get_kpi_statuses() -> list[dict]:
         config, counter = T3.GateConfig(), T3.EventCounter()
         record = None
 
-        eval_days = min(5, len(series))
+        eval_days = min(1, len(series))
         fast_forward_days = max(0, len(series) - eval_days)
         
         for date, val in zip(series["date"].iloc[:fast_forward_days], 

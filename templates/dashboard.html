@@ -32,7 +32,7 @@
     }
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
-    .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px}
+    .wrap{max-width:1440px;margin:0 auto;padding:36px 32px 80px}
 
     /* Tooltips */
     .tip{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--blue-s);color:var(--blue);font-size:10px;font-weight:600;cursor:help;border:1px solid rgba(59,130,246,.25);flex-shrink:0;position:relative;vertical-align:middle;margin-left:4px}
@@ -43,10 +43,10 @@
     /* LAYOUT & SIDEBAR */
     body { background: var(--bg); margin: 0; padding: 0; }
     .app-layout { display: flex; min-height: 100vh; }
-    .sidebar { width: 240px; background: var(--surface-sidebar); border-right: 1px solid var(--border); padding: 24px; flex-shrink: 0; display: flex; flex-direction: column; }
+    .sidebar { width: 280px; background: var(--surface-sidebar); border-right: 1px solid var(--border); padding: 28px; flex-shrink: 0; display: flex; flex-direction: column; }
     .brand { margin-bottom: 40px; }
-    .brand-title { font-size: 16px; font-weight: 700; color: #F5F5F5; letter-spacing: 0.05em; }
-    .brand-subtitle { font-size: 11px; font-weight: 500; color: #A0A0A0; margin-top: 2px; }
+    .brand-title { font-size: 18px; font-weight: 700; color: #F5F5F5; letter-spacing: 0.05em; }
+    .brand-subtitle { font-size: 12px; font-weight: 500; color: #A0A0A0; margin-top: 2px; }
     .nav { display: flex; flex-direction: column; gap: 8px; }
     .nav-item { display: flex; align-items: center; gap: 12px; height: 44px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #A0A0A0; text-decoration: none; transition: background 150ms, color 150ms; position: relative; }
     .nav-icon { width: 18px; height: 18px; stroke: #777777; transition: stroke 150ms; }
@@ -68,8 +68,20 @@
     .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 32px 80px; width: 100%; }
 
     /* Override header select control styling */
-    .hdr-right select { background: #111111; color: #F5F5F5; border: 1px solid rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; font-family: 'Inter', sans-serif; cursor: pointer; }
-    .hdr-right select:focus { border-color: var(--accent); }
+    select {
+        appearance: none; -webkit-appearance: none;
+        background: #111111 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23777777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') no-repeat right 12px center;
+        background-size: 16px;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        padding: 8px 36px 8px 12px;
+        color: var(--text);
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        outline: none;
+    }
+    select:focus { border-color: var(--accent); }
+    
     
     .live-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #A0A0A0; }
     .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #16a34a; }
@@ -135,21 +147,22 @@
     .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
     @media(max-width:860px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:560px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-    .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 16px 14px;cursor:pointer;transition:all .2s ease;box-shadow:var(--sh);display:flex;flex-direction:column;}
+    .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 16px 14px;cursor:pointer;transition:all .2s ease;box-shadow:var(--sh);display:flex;flex-direction:column;height:185px; justify-content:flex-start;}
     .kpi-card:hover{border-color:var(--muted);box-shadow:var(--sh2)}
     .kpi-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
     .kpi-card.has-anomaly{border-color:var(--accent-b);}
     .kpi-card.has-warning{border-color:var(--muted)}
     @keyframes wpulse{0%,100%{opacity:1}50%{opacity:0.6}}
-    .kpi-name{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
-    .kpi-value{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:400;letter-spacing:-0.02em;color:var(--text);margin-bottom:4px}
+    .kpi-name{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+    .kpi-value{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:400;letter-spacing:-0.02em;color:var(--text);margin-bottom:4px}
     .kpi-delta{font-size:12px;font-weight:500}
     .kpi-delta.down{color:var(--red)}.kpi-delta.up{color:var(--green)}.kpi-delta.flat{color:var(--muted)}
-    .kpi-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:100px;margin-top:8px}
-    .kpi-badge.noise{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
-    .kpi-badge.anomaly{background:var(--accent-s);color:var(--accent);border:1px solid var(--accent-b)}
+    .kpi-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px;border-radius:100px;margin-top:10px;margin-bottom:auto;width:fit-content;}
+    .kpi-badge.noise{background:rgba(85,214,138,0.08);color:#A0A0A0;border:1px solid transparent;}
+    .kpi-badge.noise .dot{background:#55D68A !important;}
+    .kpi-badge.anomaly{background:rgba(255,92,122,0.10);color:var(--accent);border:1px solid rgba(255,92,122,0.30);}
     .kpi-badge .dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;flex-shrink:0;}
-    .sparkline{margin-top:auto;padding-top:12px;width:100%;height:40px;display:block}
+    .sparkline-wrap{margin-top:auto;height:40px;width:100%;display:flex;align-items:flex-end;} .sparkline{width:100%;height:30px;display:block}
 
     /* Generic card */
     .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px 32px;box-shadow:var(--sh)}
@@ -159,13 +172,13 @@
 
     /* Story */
     .story-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
-    .story-headline{font-size:18px;font-weight:600;line-height:1.4;max-width:620px}
+    .story-headline{font-size:22px;font-weight:600;line-height:1.4;max-width:700px;display:flex;align-items:center;flex-wrap:wrap;}
     .conf-block{text-align:right;flex-shrink:0}
-    .conf-num{font-size:28px;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
-    .conf-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .conf-num{font-size:34px;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+    .conf-lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
     .conf-bar{height:4px;background:var(--border);border-radius:100px;margin-top:6px;overflow:hidden;min-width:100px}
     .conf-bar-fill{height:100%;background:var(--accent);border-radius:100px}
-    .esc-badge{font-size:11px;background:var(--red-s);color:var(--red);border:1px solid var(--red);padding:2px 8px;border-radius:100px;margin-left:8px;font-weight:600}
+    .esc-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;background:rgba(255,92,122,0.10);color:#FF5C7A;border:1px solid rgba(255,92,122,0.30);padding:4px 12px;border-radius:6px;margin-left:14px;font-weight:600;white-space:nowrap;vertical-align:middle;}
     .peer-chip{display:inline-block;font-size:11px;padding:3px 10px;border-radius:100px;margin-left:8px;font-weight:600}
     .peer-chip.Market-wide{background:var(--green-s);color:var(--green)}
     .peer-chip.Regional{background:var(--accent-s);color:var(--accent)}
@@ -238,24 +251,24 @@
       <div class="brand-subtitle">Business Intelligence</div>
     </div>
     <nav class="nav">
-      <a href="#" class="nav-item" data-target="overview" onclick="switchTab('overview', 'Overview', 'Data processing workflow & architecture')">
+      <a href="#" class="nav-item" data-target="overview" onclick="event.preventDefault(); switchTab('overview', 'Overview', 'Data processing workflow & architecture')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         Overview
       </a>
-      <a href="#" class="nav-item active" data-target="health" onclick="switchTab('health', 'Business Health', 'Business performance at a glance')">
+      <a href="#" class="nav-item active" data-target="health" onclick="event.preventDefault(); switchTab('health', 'Business Health', 'Business performance at a glance')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
         Business Health
       </a>
-      <a href="#" class="nav-item" data-target="analysis" onclick="switchTab('analysis', 'Analysis', 'Add custom metrics and insights')">
+      <a href="#" class="nav-item" data-target="analysis" onclick="event.preventDefault(); switchTab('analysis', 'Analysis', 'Add custom metrics and insights')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         Analysis
       </a>
-      <a href="#" class="nav-item" data-target="insights" onclick="switchTab('insights', 'Insights', 'AI extracted news and macro context')">
+      <a href="#" class="nav-item" data-target="insights" onclick="event.preventDefault(); switchTab('insights', 'Insights', 'AI extracted news and macro context')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"></path><path d="M10 18h4"></path><path d="M12 2v2"></path><path d="M12 14v4"></path><path d="M4 12h2"></path><path d="M18 12h2"></path><path d="M5.64 5.64l1.41 1.41"></path><path d="M16.95 16.95l1.41 1.41"></path><path d="M5.64 18.36l1.41-1.41"></path><path d="M16.95 7.05l1.41-1.41"></path><circle cx="12" cy="12" r="4"></circle></svg>
         Insights
       </a>
       <div class="nav-divider"></div>
-      <a href="#" class="nav-item" data-target="settings" onclick="switchTab('settings', 'Settings', 'Application settings')">
+      <a href="#" class="nav-item" data-target="settings" onclick="event.preventDefault(); switchTab('settings', 'Settings', 'Application settings')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         Settings
       </a>
@@ -286,17 +299,74 @@
       <div id="tab-overview" class="tab-pane" style="display:none;">
         <div class="card">
           <h2 class="sec-title">Data Processing Workflow</h2>
-          <p style="margin-top: 10px; color: var(--text2);">The processes through which the input data goes through are strictly defined in steps:</p>
-          <ul style="margin-left: 20px; margin-top: 10px; color: var(--text2); line-height: 1.8;">
-            <li><strong>Step 1: Data Ingestion (task1)</strong> - Raw data is securely fetched from source systems and ingested into the staging area.</li>
-            <li><strong>Step 2: Validation & Cleansing</strong> - Missing values are handled and structural integrity is checked.</li>
-            <li><strong>Step 3: KPI Engine Processing</strong> - Data is passed through anomaly detection algorithms.</li>
-            <li><strong>Step 4: LLM Synthesizer</strong> - Detected anomalies are packaged and sent to the LLM backend for root cause analysis.</li>
-            <li><strong>Step 5: Dashboard Rendering</strong> - Synthesized insights are displayed in this secure BI portal.</li>
-          </ul>
+          <p style="margin-top: 10px; color: var(--text2);">The processes through which the input data goes through are strictly defined in a vertical pipeline. Each stage validates and enriches the data before passing it downstream.</p>
+          
+          <style>
+            .flowchart { position: relative; padding: 20px 0 10px 40px; margin-top: 20px; }
+            .flowchart::before { content: ''; position: absolute; top: 0; left: 15px; width: 2px; height: 100%; background: var(--border); }
+            .flow-step { position: relative; margin-bottom: 28px; }
+            .flow-step:last-child { margin-bottom: 0; }
+            .flow-node { position: absolute; left: -40px; top: 4px; width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; box-shadow: 0 0 0 6px var(--surface); z-index: 2; }
+            .flow-content { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 24px; position: relative; }
+            .flow-content::before { content: ''; position: absolute; top: 14px; left: -6px; width: 10px; height: 10px; background: var(--surface2); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border); transform: rotate(45deg); }
+            .flow-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+            .flow-desc { font-size: 13.5px; color: var(--text2); line-height: 1.6; margin: 0; }
+            .flow-code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: rgba(255,255,255,0.05); color: var(--muted); padding: 2px 6px; border-radius: 4px; margin-left: auto; border: 1px solid var(--border); }
+          </style>
+
+          <div class="flowchart">
+            
+            <div class="flow-step">
+              <div class="flow-node">1</div>
+              <div class="flow-content">
+                <div class="flow-title">Data Ingestion <span class="flow-code">task1/ingest_pipeline</span></div>
+                <p class="flow-desc">Connects to external systems (data warehouses, APIs, document stores) to securely pull raw business data. It normalizes distinct formats into a standard schema (Time, Region, Product, Metric, Value) required by the analytics engine.</p>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-node">2</div>
+              <div class="flow-content">
+                <div class="flow-title">Validation & Cleansing <span class="flow-code">task1/normalize.py</span></div>
+                <p class="flow-desc">Performs rigorous data quality checks. Handles missing values through interpolation, drops corrupted records, and verifies structural integrity. This ensures that upstream data quality issues do not trigger false alerts.</p>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-node">3</div>
+              <div class="flow-content">
+                <div class="flow-title">KPI Engine & Anomaly Detection <span class="flow-code">task3/anomaly_gate.py</span></div>
+                <p class="flow-desc">Applies robust statistical modeling (such as trailing baselines, Prophet forecasts, and Z-score gating). It actively scans the time-series data to flag outliers, structural breaks, and early-warning trend shifts.</p>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-node">4</div>
+              <div class="flow-content">
+                <div class="flow-title">Evidence Retrieval & Causal Analysis <span class="flow-code">task4 & task5</span></div>
+                <p class="flow-desc">When an anomaly is detected, this layer searches for correlations against internal metrics (e.g. price drops affecting revenue) and external unstructured data (news, event logs). It establishes causality to filter out pure coincidences.</p>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-node">5</div>
+              <div class="flow-content">
+                <div class="flow-title">LLM Synthesizer <span class="flow-code">task6/synthesize.py</span></div>
+                <p class="flow-desc">Packages the statistical and causal evidence into a prompt for the selected Large Language Model (e.g., Llama, Gemini, OpenAI). The LLM reasons over the data, formulates root-cause hypotheses, calculates confidence scores, and adapts its narrative for different user personas.</p>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-node">6</div>
+              <div class="flow-content">
+                <div class="flow-title">Dashboard Rendering <span class="flow-code">app.py</span></div>
+                <p class="flow-desc">The finalized insights are delivered via REST API to this secure, interactive Business Intelligence dashboard. End users can explore trends, drill down into root causes, and monitor system health.</p>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
-
       <div id="tab-insights" class="tab-pane" style="display:none;">
         <div class="card" style="margin-bottom: 24px;">
           <h2 class="sec-title" style="margin-bottom: 14px;">Sector News</h2>
@@ -435,16 +505,16 @@
             <div class="fg2">
               <div class="fg">
                 <label>Metric Code</label>
-                <input type="text" id="ckId" placeholder="e.g., cac_ratio">
+                <input type="text" id="ckId" placeholder="e.g., ebitda_margin">
               </div>
               <div class="fg">
                 <label>Display Name</label>
-                <input type="text" id="ckName" placeholder="e.g., CAC Ratio">
+                <input type="text" id="ckName" placeholder="e.g., EBITDA Margin">
               </div>
             </div>
             <div class="fg" style="margin-bottom:14px">
               <label>Formula (optional)</label>
-              <input type="text" id="ckFormula" placeholder="e.g., marketing_spend / new_customers">
+              <input type="text" id="ckFormula" placeholder="e.g., operating_profit / total_revenue">
               <div class="fhint">Supports basic math and existing metric codes. Leave blank for direct data ingestion.</div>
             </div>
             <div class="fg2">
@@ -464,6 +534,53 @@
         
     </div>
   </div>
+
+        <div class="sec" style="margin-top: 36px;">
+          <div class="sec-hdr">
+            <h2 class="sec-title">Terminology Reference</h2>
+            <span class="sec-desc">A detailed explanation of the parameters used to configure your metrics.</span>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+            
+            <div class="card" style="padding: 20px; box-shadow: var(--sh);">
+              <h3 style="color: var(--text); font-size: 14px; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px;"><span style="color: var(--accent);">#</span> Metric Code</h3>
+              <p style="color: var(--text2); font-size: 13px; margin: 0; line-height: 1.6;">
+                A unique, machine-readable identifier (e.g., <code style="font-family: 'JetBrains Mono', monospace; color: var(--accent); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">ebitda_margin</code>). Used internally by the backend and database to store and query the time-series data. It should contain no spaces or special characters.
+              </p>
+            </div>
+
+            <div class="card" style="padding: 20px; box-shadow: var(--sh);">
+              <h3 style="color: var(--text); font-size: 14px; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px;"><span style="color: var(--accent);">T</span> Display Name</h3>
+              <p style="color: var(--text2); font-size: 13px; margin: 0; line-height: 1.6;">
+                The human-readable label shown on the dashboard cards, charts, and AI-generated stories (e.g., "EBITDA Margin"). This can contain spaces and capitalization to make reports easy to read for executives and analysts.
+              </p>
+            </div>
+
+            <div class="card" style="padding: 20px; box-shadow: var(--sh);">
+              <h3 style="color: var(--text); font-size: 14px; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px;"><span style="color: var(--accent);">?</span> Formula</h3>
+              <p style="color: var(--text2); font-size: 13px; margin: 0; line-height: 1.6;">
+                A mathematical expression used to calculate a derived metric dynamically. You can use basic math (<code style="font-family: 'JetBrains Mono', monospace; color: var(--accent);">+, -, *, /</code>) combined with existing <em>Metric Codes</em>. If left blank, the system assumes the metric is ingested directly from the data warehouse.
+              </p>
+            </div>
+
+            <div class="card" style="padding: 20px; box-shadow: var(--sh);">
+              <h3 style="color: var(--text); font-size: 14px; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px;"><span style="color: var(--accent);">?</span> Warning Threshold (%)</h3>
+              <p style="color: var(--text2); font-size: 13px; margin: 0; line-height: 1.6;">
+                The sensitivity level for early warnings. If the real-time value deviates from the Prophet forecasted baseline by this percentage, the metric enters a <strong>Warning</strong> state, allowing early intervention before it becomes critical.
+              </p>
+            </div>
+
+            <div class="card" style="padding: 20px; box-shadow: var(--sh);">
+              <h3 style="color: var(--text); font-size: 14px; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px;"><span style="color: var(--accent);">??</span> Critical Threshold (%)</h3>
+              <p style="color: var(--text2); font-size: 13px; margin: 0; line-height: 1.6;">
+                The severity limit that triggers a hard anomaly alert. Breaching this threshold actively fires the LLM synthesizer to perform root-cause analysis, generate hypotheses, and pull contextual news evidence.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
       </div> <!-- End tab-analysis -->
 </div>
 
@@ -634,13 +751,10 @@ function renderSparkline(hist){
   const w=80,h=30,vals=hist.values,ub=hist.upper_bounds||vals,lb=hist.lower_bounds||vals;
   const max=Math.max(...vals,...ub),min=Math.min(...vals,...lb),range=(max-min)||1;
   const dx=w/(vals.length-1||1),getY=v=>h-((v-min)/range)*h;
-  let area='';
-  for(let i=0;i<vals.length-1;i++){if(vals[i]==null||vals[i+1]==null)continue;area+=`${i*dx},${getY(ub[i])} ${(i+1)*dx},${getY(ub[i+1])} ${(i+1)*dx},${getY(lb[i+1])} ${i*dx},${getY(lb[i])} `;}
   let path='',first=true;
   for(let i=0;i<vals.length;i++){if(vals[i]!=null){if(first){path+=`M ${i*dx} ${getY(vals[i])}`;first=false;}else{path+=` L ${i*dx} ${getY(vals[i])}`;} }}
-  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polygon points="${area}" fill="rgba(245,158,11,.08)"/><path d="${path}" fill="none" stroke="var(--muted)" stroke-width="1.5"/><circle cx="${(vals.length-1)*dx}" cy="${getY(vals[vals.length-1])}" r="2.5" fill="var(--accent)"/></svg>`;
+  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><path d="${path}" fill="none" stroke="#A100FF" stroke-width="1.5"/><circle cx="${(vals.length-1)*dx}" cy="${getY(vals[vals.length-1])}" r="2" fill="#A100FF"/></svg>`;
 }
-
 function renderHeader(){
   const b=document.getElementById('warningBanner');
   if(b){if(state.earlyWarnings.length>0){b.style.display='flex';b.innerHTML=`&#9888; ${state.earlyWarnings[0].name} is trending toward a problem`;}else b.style.display='none';}
@@ -670,23 +784,48 @@ function renderHeatmap(){
 
 function renderGrid(){
   const grid=document.getElementById('kpiGrid');grid.innerHTML='';
-  const nm={'revenue_total':'Total Revenue &#128176;','units_sold':'Units Sold &#128230;','avg_price':'Avg. Selling Price &#127991;','marketing_spend':'Marketing Spend &#128226;','inventory_level':'Inventory Level &#127981;'};
+  
+  const iconSvg = (path) => `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+  const icons={
+    'revenue_total': iconSvg('<line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>'),
+    'units_sold': iconSvg('<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>'),
+    'avg_price': iconSvg('<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>'),
+    'marketing_spend': iconSvg('<polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon>'),
+    'inventory_level': iconSvg('<line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>')
+  };
+  const nm={'revenue_total':'Total Revenue','units_sold':'Units Sold','avg_price':'Avg. Selling Price','marketing_spend':'Marketing Spend','inventory_level':'Inventory Level'};
+  
   Object.values(state.kpis).forEach(k=>{
     const el=document.createElement('div');
     el.className='kpi-card'+(k.kpi_id===state.selectedKpi?' active':'')+(k.status==='anomaly'?' has-anomaly':'')+(k.early_warning?' has-warning':'');
     el.onclick=()=>selectKpi(k.kpi_id);
-    const spark=state.kpiHistory[k.kpi_id]&&!state.kpiHistory[k.kpi_id].error?renderSparkline(state.kpiHistory[k.kpi_id]):'';
+    
+    let spark='<div class="sparkline-wrap"></div>';
+    if(state.kpiHistory[k.kpi_id]&&!state.kpiHistory[k.kpi_id].error){
+       spark = `<div class="sparkline-wrap">${renderSparkline(state.kpiHistory[k.kpi_id])}</div>`;
+    }
+    
     const isAnomaly=k.status==='anomaly',isInsufficient=k.status==='insufficient_data';
-    const dotColor=isAnomaly?'var(--accent)':isInsufficient?'var(--muted)':'var(--green)';
-    const badgeLabel=isInsufficient?'Not enough data':isAnomaly?'Problem detected — click!':'All normal';
+    const badgeLabel=isInsufficient?'Not enough data':isAnomaly?'Problem detected - click!':'All normal';
     const bc=isAnomaly?'anomaly':'noise';
+    
     const fmtVal=k.value!==undefined?Number(k.value).toLocaleString(undefined,{minimumFractionDigits:k.value%1!==0?2:0,maximumFractionDigits:2}):'--';
-    const deltaArrow=k.delta_pct!==undefined?(k.delta_pct>0?'&#9650; ':'&#9660; ')+Math.abs(k.delta_pct)+'% vs expected':'--';
-    el.innerHTML=`<p class="kpi-name">${nm[k.kpi_id]||k.name}</p><p class="kpi-value">${fmtVal}</p><span class="kpi-delta ${k.trend_direction||'flat'}">${deltaArrow}</span><br/><span class="kpi-badge ${bc}"><span class="dot" style="background:${dotColor};"></span> ${badgeLabel}</span>${spark}`;
+    
+    // FLAG FOR REVIEW: Confirm if these mappings are correct for "good" directions.
+    const lowerIsBetter = (k.kpi_id === 'marketing_spend' || k.kpi_id === 'inventory_level');
+    const isUp = k.delta_pct > 0;
+    const isGood = lowerIsBetter ? !isUp : isUp;
+    const trendColor = isGood ? '#55D68A' : '#FF5C7A';
+    const trendArrow = isUp ? '&#9650;' : '&#9660;';
+    const deltaHtml = k.delta_pct !== undefined ? `<span style="color:${trendColor}; display:inline-flex; align-items:center; gap:4px; font-weight:600;"><span style="font-size:10px;">${trendArrow}</span> ${Math.abs(k.delta_pct)}% vs expected</span>` : '--';
+    
+    const iconHtml = icons[k.kpi_id] || icons['revenue_total'];
+    const nameHtml = nm[k.kpi_id] || k.name;
+    
+    el.innerHTML=`<p class="kpi-name">${nameHtml} ${iconHtml}</p><p class="kpi-value">${fmtVal}</p><div class="kpi-delta">${deltaHtml}</div><span class="kpi-badge ${bc}"><span class="dot"></span> ${badgeLabel}</span>${spark}`;
     grid.appendChild(el);
   });
 }
-
 async function selectKpi(kpiId){
   state.selectedKpi=kpiId;renderGrid();
   const k=state.kpis[kpiId];
@@ -859,7 +998,7 @@ function startLiveUpdates(){
   }else{setInterval(loadKpis,60000);}
 }
 
-showOutputView();loadKpis();loadHistory();startLiveUpdates();
+showInputView();loadKpis();loadHistory();startLiveUpdates();
 </script>
 </body>
 </html>

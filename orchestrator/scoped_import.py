@@ -58,4 +58,5 @@ def scoped_task_dir(task_dir: str):
                 Path(origin).resolve().relative_to(task_dir_path)
             except ValueError:
                 continue  # shared third-party/stdlib module -- leave it
-            del sys.modules[name]
+            if name in sys.modules:
+                del sys.modules[name]
