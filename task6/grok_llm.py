@@ -68,6 +68,13 @@ class GrokLLMClient:
             msg = f"Grok API request failed: {e}"
             if hasattr(e, 'response') and e.response is not None:
                 msg += f" | Details: {e.response.text}"
+                if "Model not found" in e.response.text:
+                    try:
+                        r = requests.get(f"{self.base_url}/models", headers={"Authorization": f"Bearer {self.api_key}"})
+                        models = [m["id"] for m in r.json().get("data", [])]
+                        msg += f" | VALID MODELS FOR YOUR KEY: {', '.join(models)}"
+                    except:
+                        pass
             raise RuntimeError(msg)
         except (KeyError, json.JSONDecodeError) as e:
             raise RuntimeError(f"Failed to parse Grok response: {e}\nResponse: {generated_text}")
