@@ -46,7 +46,7 @@ class GeminiLLMClient:
         try:
             response = requests.post(url, params={"key": self.api_key}, json=payload, timeout=25)
         except requests.exceptions.Timeout as e:
-            raise RuntimeError(f"Gemini didn't respond within {self.timeout:.0f}s. Original error: {e}")
+            raise RuntimeError(f"Gemini didn't respond within 25s. Original error: {e}")
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Gemini API request failed: {e}")
 
