@@ -674,9 +674,9 @@ document.getElementById('backendSelector').addEventListener('change',e=>{
   } else {
     if(modelContainer) modelContainer.style.display = 'flex';
     const defaults = {
-      'ollama': 'llama3:8b',
-      'gemini': 'gemini-1.5-flash',
-      'openai': 'gpt-4o-mini',
+      'ollama': 'llama3.2',
+      'gemini': 'gemini-3.7-flash',
+      'openai': 'gpt-5.6-luna',
       'grok': 'grok-4.6'
     };
     if (defaults[state.backend] && modelInput) {
