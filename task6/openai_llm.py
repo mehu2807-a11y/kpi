@@ -49,7 +49,7 @@ class OpenAILLMClient:
                     "Content-Type": "application/json",
                 },
                 json=payload,
-                timeout=self.timeout,
+                timeout=25,
             )
         except requests.exceptions.Timeout as e:
             raise RuntimeError(f"OpenAI didn't respond within {self.timeout:.0f}s. Original error: {e}")

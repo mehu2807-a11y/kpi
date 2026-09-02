@@ -45,7 +45,7 @@ class GrokLLMClient:
                     "Content-Type": "application/json"
                 },
                 json=payload,
-                timeout=90
+                timeout=25
             )
             response.raise_for_status()
 
