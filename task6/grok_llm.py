@@ -34,8 +34,7 @@ class GrokLLMClient:
                 {"role": "system", "content": system},
                 {"role": "user", "content": user}
             ],
-            "temperature": 0.1,  # Low temp for consistent outputs
-            "response_format": {"type": "json_object"}  # Important: requests JSON output
+            "temperature": 0.1  # Low temp for consistent outputs
         }
 
         try:
@@ -54,9 +53,21 @@ class GrokLLMClient:
             generated_text = result["choices"][0]["message"]["content"].strip()
 
             # Parse the JSON from the generated text
-            return json.loads(generated_text)
+            # Strip markdown fences if present
+            clean_text = generated_text.strip()
+            if clean_text.startswith("```json"):
+                clean_text = clean_text[7:]
+            elif clean_text.startswith("```"):
+                clean_text = clean_text[3:]
+            if clean_text.endswith("```"):
+                clean_text = clean_text[:-3]
+            
+            return json.loads(clean_text.strip())
 
         except requests.exceptions.RequestException as e:
-            raise RuntimeError(f"Grok API request failed: {e}")
+            msg = f"Grok API request failed: {e}"
+            if hasattr(e, 'response') and e.response is not None:
+                msg += f" | Details: {e.response.text}"
+            raise RuntimeError(msg)
         except (KeyError, json.JSONDecodeError) as e:
             raise RuntimeError(f"Failed to parse Grok response: {e}\nResponse: {generated_text}")
