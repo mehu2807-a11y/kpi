@@ -48,7 +48,7 @@ class OllamaLLMClient:
             response = requests.post(
                 f"{self.base_url}/api/generate",
                 json=payload,
-                timeout=25
+                timeout=55
             )
             response.raise_for_status()
             
