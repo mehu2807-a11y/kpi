@@ -9,6 +9,8 @@ import os
 from typing import Optional
 import requests
 
+from retry_utils import request_with_retry
+
 
 class GeminiLLMClient:
     """
@@ -44,11 +46,23 @@ class GeminiLLMClient:
         url = f"{self.base_url}/models/{self.model}:generateContent"
 
         try:
-            response = requests.post(url, params={"key": self.api_key}, json=payload, timeout=55)
+            # Retries transient errors (429 rate-limit, 500/502/503/504
+            # overload or outage) with backoff before giving up -- these are
+            # common with Gemini and usually clear within a couple seconds.
+            # The whole retry loop (all attempts + backoff) is capped at
+            # LLM_RETRY_BUDGET_SECONDS wall-clock time so we fail fast with a
+            # clean JSON error instead of running past a reverse-proxy's own
+            # timeout and getting a generic HTML "Internal Server Error" page.
+            response = request_with_retry(
+                lambda t: requests.post(url, params={"key": self.api_key}, json=payload, timeout=t),
+                total_budget=float(os.environ.get("LLM_RETRY_BUDGET_SECONDS", 45)),
+            )
         except requests.exceptions.Timeout as e:
-            raise RuntimeError(f"Gemini didn't respond within 55s. Original error: {e}")
+            raise RuntimeError(f"Gemini didn't respond in time. Original error: {e}")
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Gemini API request failed: {e}")
+        except TimeoutError as e:
+            raise RuntimeError(f"Gemini API call aborted: {e}")
 
         if response.status_code in (400, 403):
             raise RuntimeError(
@@ -62,8 +76,13 @@ class GeminiLLMClient:
             )
         if response.status_code == 429:
             raise RuntimeError(
-                "Gemini rate-limited or quota-exhausted this request (HTTP 429). Check your "
-                "usage at https://aistudio.google.com."
+                "Gemini rate-limited or quota-exhausted this request (HTTP 429), and retries "
+                "were still rate-limited. Check your usage at https://aistudio.google.com."
+            )
+        if response.status_code == 503:
+            raise RuntimeError(
+                f"Gemini's model {self.model!r} is overloaded (HTTP 503) and stayed unavailable "
+                "after several retries. This is on Google's side -- wait a bit and try again."
             )
         try:
             response.raise_for_status()

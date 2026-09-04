@@ -663,6 +663,27 @@ function showOutputView() {
 
 const state={kpis:{},kpiHistory:{},selectedKpi:null,activeRole:'EXECUTIVE',backend:'ollama',apiKey:'',lastStory:null,feedbackHistory:[],earlyWarnings:[],lastUpdated:null};
 
+const CLIENT_POLL_GIVEUP_MS = 6 * 60 * 1000;
+async function runAsyncJob(url, payload) {
+  const postRes = await fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+  if (!postRes.ok) throw new Error("Server error: " + postRes.status);
+  const postData = await postRes.json();
+  if (postData.error) throw new Error(postData.error);
+  if (!postData.job_id) return postData;
+  const jobId = postData.job_id;
+  const startTime = Date.now();
+  while (true) {
+    await new Promise(r => setTimeout(r, 2000));
+    if (Date.now() - startTime > CLIENT_POLL_GIVEUP_MS) throw new Error("Analysis timed out after 6 minutes. The AI is too slow.");
+    const statusRes = await fetch(url + '/status/' + jobId);
+    if (!statusRes.ok) { const text = await statusRes.text(); throw new Error(`Status check failed: ${statusRes.status} ${text.substring(0, 100)}`); }
+    const statusData = await statusRes.json();
+    if (statusData.status === 'error') throw new Error(statusData.error || "Unknown error during analysis");
+    if (statusData.status === 'done') return statusData.result;
+  }
+}
+
+
 document.getElementById('backendSelector').addEventListener('change',e=>{
   state.backend=e.target.value;
   document.getElementById('apiKeyLabel').style.display=['gemini','openai','anthropic','grok'].includes(state.backend)?'flex':'none';
@@ -834,7 +855,7 @@ async function selectKpi(kpiId){
   try{
     const payload={test_case:'live',kpi_id:kpiId,region:'Region X',backend:state.backend};
     if(state.apiKey)payload.api_key=state.apiKey;
-    const data=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>r.json());
+    const data=await runAsyncJob('/analyze', payload);
     if(data.error){document.getElementById('detailPanel').innerHTML=`<div class="card"><div class="story-empty"><div class="ei">&#10060;</div><p><strong>Error:</strong> ${data.error}</p></div></div>`;return;}
     if(data.verdict==='noise'){document.getElementById('detailPanel').innerHTML=`<div class="card"><div class="story-empty"><div class="ei">&#9989;</div><p>Deeper check confirms this is normal variation &mdash; no action needed.</p></div></div>`;return;}
     state.lastStory=data;renderStory(data);
@@ -958,23 +979,13 @@ async function runMagicAnalysis(){
     const pl={raw_text:raw,backend:state.backend,model:document.getElementById('modelInput').value};
     if(state.apiKey)pl.api_key=state.apiKey;
     
-    const fmtRes=await fetch('/format_input',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pl)});
-    if (!fmtRes.ok) {
-        const errText = await fmtRes.text();
-        throw new Error("Server error: " + fmtRes.status + " " + errText.substring(0, 100));
-    }
-    const fmt=await fmtRes.json();
+    const fmt = await runAsyncJob('/format_input', pl);
     if(fmt.error)throw new Error(fmt.error);
     sSp.innerHTML='Step 2/2: Running causal analysis...';
     const apl={test_case:'custom',backend:state.backend,model:pl.model,anomaly:fmt.anomaly,correlation:fmt.correlation,evidence:fmt.evidence};
     if(state.apiKey)apl.api_key=state.apiKey;
     
-    const storyRes=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(apl)});
-    if (!storyRes.ok) {
-        const errText = await storyRes.text();
-        throw new Error("Server error: " + storyRes.status + " " + errText.substring(0, 100));
-    }
-    const story=await storyRes.json();
+    const story=await runAsyncJob('/analyze', apl);
 
     if(story.error)throw new Error(story.error);
     sSp.innerHTML='&#9989; Analysis complete!';sSp.style.color='var(--green)';

@@ -11,6 +11,7 @@ import requests
 
 from schemas import AnomalyEvent, CorrelationResult, RetrievedEvidence
 from llm_client import SYSTEM_PROMPT, build_user_prompt
+from retry_utils import request_with_retry
 
 
 class GrokLLMClient:
@@ -38,15 +39,30 @@ class GrokLLMClient:
         }
 
         try:
-            response = requests.post(
-                f"{self.base_url}/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                },
-                json=payload,
-                timeout=55
+            # Retries transient errors (429 rate-limit, 500/502/503/504
+            # overload or outage) with backoff before giving up. The whole
+            # retry loop (all attempts + backoff) is capped at
+            # LLM_RETRY_BUDGET_SECONDS wall-clock time so we fail fast with
+            # a clean JSON error instead of running past a reverse-proxy's
+            # own timeout and getting a generic HTML error page back.
+            response = request_with_retry(
+                lambda t: requests.post(
+                    f"{self.base_url}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json=payload,
+                    timeout=t
+                ),
+                total_budget=float(os.environ.get("LLM_RETRY_BUDGET_SECONDS", 45)),
             )
+            if response.status_code == 503:
+                raise RuntimeError(
+                    f"Grok's model {self.model!r} is overloaded (HTTP 503) and stayed "
+                    "unavailable after several retries. This is on xAI's side -- wait a bit "
+                    "and try again."
+                )
             response.raise_for_status()
 
             result = response.json()
@@ -78,3 +94,5 @@ class GrokLLMClient:
             raise RuntimeError(msg)
         except (KeyError, json.JSONDecodeError) as e:
             raise RuntimeError(f"Failed to parse Grok response: {e}\nResponse: {generated_text}")
+        except TimeoutError as e:
+            raise RuntimeError(f"Grok API call aborted: {e}")

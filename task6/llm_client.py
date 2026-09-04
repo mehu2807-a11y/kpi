@@ -161,19 +161,37 @@ class AnthropicLLMClient:
         return self._client
 
     def complete_json(self, system: str, user: str) -> dict:
+        import time
+
         client = self._get_client()
-        try:
-            response = client.messages.create(
-                model=self.model,
-                max_tokens=self.max_tokens,
-                system=system,
-                messages=[{"role": "user", "content": user}],
-            )
-        except Exception as e:
-            # Covers anthropic.AuthenticationError (bad key), NotFoundError (bad
-            # model name), RateLimitError, APIConnectionError, etc. in one place
-            # rather than importing and matching every SDK exception class.
-            raise RuntimeError(f"Anthropic API request failed: {e}")
+        max_retries = 3
+        last_exc = None
+        for attempt in range(max_retries + 1):
+            try:
+                response = client.messages.create(
+                    model=self.model,
+                    max_tokens=self.max_tokens,
+                    system=system,
+                    messages=[{"role": "user", "content": user}],
+                )
+                break
+            except Exception as e:
+                # Retry transient, non-request-specific failures (rate limits,
+                # momentary overload, connection hiccups) with backoff --
+                # they usually clear within a couple seconds. Anything else
+                # (bad key, bad model name, etc.) still fails on the first try.
+                status_code = getattr(e, "status_code", None)
+                is_transient = status_code in (429, 500, 502, 503, 504) or \
+                    type(e).__name__ in ("RateLimitError", "APIConnectionError", "APITimeoutError", "InternalServerError")
+                last_exc = e
+                if is_transient and attempt < max_retries:
+                    time.sleep(1.5 * (2 ** attempt))
+                    continue
+                # Covers anthropic.AuthenticationError (bad key), NotFoundError
+                # (bad model name), RateLimitError, APIConnectionError, etc.
+                # in one place rather than importing and matching every SDK
+                # exception class.
+                raise RuntimeError(f"Anthropic API request failed: {e}")
         text = "".join(block.text for block in response.content if block.type == "text")
         try:
             return json.loads(_strip_code_fence(text))

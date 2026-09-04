@@ -397,16 +397,6 @@ def _coerce_formatted_payload(raw: dict) -> dict:
 
 @app.route('/format_input', methods=['POST'])
 def format_input():
-    """Lets the user paste raw business data in ANY format -- CSV rows, a
-    paragraph of notes, a support ticket, whatever they have -- and uses
-    their selected AI backend to reshape it into the exact anomaly /
-    correlation / evidence JSON shape /analyze's custom-case path expects.
-    The frontend then shows that JSON for review before running /analyze on
-    it, so a bad AI-formatting pass is always visible and editable, never
-    silently wrong."""
-    from dataclasses import asdict, fields
-    from schemas import AnomalyEvent, CorrelationResult, RetrievedEvidence, StructuredDriver, EvidenceSource
-
     _t0 = time.time()
     try:
         data = request.get_json(silent=True) or {}
@@ -426,202 +416,234 @@ def format_input():
                          "Ollama or another backend above, then try formatting again."
             }), 400
 
-        print(f"[/format_input] starting: backend={backend!r} input_len={len(raw_text)} chars",
-              flush=True)
+        job_id = job_store.create_job()
 
-        client = get_llm_client(backend, model, api_key)
+        def _format_background(job_id, data, raw_text, backend, model, api_key, _t0):
+            try:
+                from dataclasses import asdict, fields
+                from schemas import AnomalyEvent, CorrelationResult, RetrievedEvidence, StructuredDriver, EvidenceSource
+                
+                print(f"[/format_input] starting background job {job_id}: backend={backend!r} input_len={len(raw_text)} chars", flush=True)
 
-        user_prompt = (
-            f"{FORMAT_SCHEMA_HINT}\n\nRAW INPUT TO CONVERT:\n\"\"\"\n{raw_text}\n\"\"\"\n\n"
-            f"Respond with the JSON object described above and nothing else."
-        )
-        raw = client.complete_json(FORMAT_SYSTEM_PROMPT, user_prompt)
-        raw = _coerce_formatted_payload(raw)
+                client = get_llm_client(backend, model, api_key)
 
-        anomaly_fields = {f.name for f in fields(AnomalyEvent)}
-        driver_fields = {f.name for f in fields(StructuredDriver)}
-        source_fields = {f.name for f in fields(EvidenceSource)}
+                user_prompt = (
+                    f"{FORMAT_SCHEMA_HINT}\n\nRAW INPUT TO CONVERT:\n\"\"\"\n{raw_text}\n\"\"\"\n\n"
+                    f"Respond with the JSON object described above and nothing else."
+                )
+                raw = client.complete_json(FORMAT_SYSTEM_PROMPT, user_prompt)
+                raw = _coerce_formatted_payload(raw)
 
-        anomaly_data = {k: v for k, v in raw['anomaly'].items() if k in anomaly_fields}
-        drivers_data = [{k: v for k, v in d.items() if k in driver_fields}
-                         for d in raw['correlation'].get('drivers', [])]
-        sources_data = [{k: v for k, v in s.items() if k in source_fields}
-                         for s in raw['evidence'].get('sources', [])]
+                anomaly_fields = {f.name for f in fields(AnomalyEvent)}
+                driver_fields = {f.name for f in fields(StructuredDriver)}
+                source_fields = {f.name for f in fields(EvidenceSource)}
 
-        anomaly = AnomalyEvent(**anomaly_data)
-        if anomaly.direction not in ('increase', 'decrease'):
-            raise ValueError(f"anomaly.direction must be 'increase' or 'decrease', got {anomaly.direction!r}")
-        drivers = [StructuredDriver(**d) for d in drivers_data]
-        correlation = CorrelationResult(anomaly_id=anomaly.anomaly_id, drivers=drivers)
-        sources = [EvidenceSource(**s) for s in sources_data]
-        evidence = RetrievedEvidence(anomaly_id=anomaly.anomaly_id, sources=sources)
+                anomaly_data = {k: v for k, v in raw['anomaly'].items() if k in anomaly_fields}
+                drivers_data = [{k: v for k, v in d.items() if k in driver_fields}
+                                 for d in raw['correlation'].get('drivers', [])]
+                sources_data = [{k: v for k, v in s.items() if k in source_fields}
+                                 for s in raw['evidence'].get('sources', [])]
 
-        result = {
-            "anomaly": asdict(anomaly),
-            "correlation": asdict(correlation),
-            "evidence": asdict(evidence),
-        }
-        print(f"[/format_input] done in {time.time() - _t0:.1f}s", flush=True)
-        return jsonify(result)
+                anomaly = AnomalyEvent(**anomaly_data)
+                if anomaly.direction not in ('increase', 'decrease'):
+                    raise ValueError(f"anomaly.direction must be 'increase' or 'decrease', got {anomaly.direction!r}")
+                drivers = [StructuredDriver(**d) for d in drivers_data]
+                correlation = CorrelationResult(anomaly_id=anomaly.anomaly_id, drivers=drivers)
+                sources = [EvidenceSource(**s) for s in sources_data]
+                evidence = RetrievedEvidence(anomaly_id=anomaly.anomaly_id, sources=sources)
 
-    except (TypeError, ValueError) as e:
-        # Bad/missing fields in the AI's formatted output -- a 422 (not 500)
-        # since the request itself was fine, the AI's output just didn't
-        # validate. raw_llm_output lets the frontend show exactly what came
-        # back so the user can see what went wrong.
-        print(f"[/format_input] failed after {time.time() - _t0:.1f}s: {e}", flush=True)
-        return jsonify({
-            "error": f"The AI's formatted output was missing or had invalid fields: {e}",
-            "raw_llm_output": raw if 'raw' in dir() else None,
-        }), 422
+                result = {
+                    "anomaly": asdict(anomaly),
+                    "correlation": asdict(correlation),
+                    "evidence": asdict(evidence),
+                }
+                print(f"[/format_input] done in {time.time() - _t0:.1f}s", flush=True)
+                job_store.update_job(job_id, 'done', result=result)
+
+            except (TypeError, ValueError) as e:
+                print(f"[/format_input] failed after {time.time() - _t0:.1f}s: {e}", flush=True)
+                job_store.update_job(job_id, 'error', error=f"The AI's formatted output was missing or had invalid fields: {e}")
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                print(f"[/format_input] failed after {time.time() - _t0:.1f}s: {e}", flush=True)
+                job_store.update_job(job_id, 'error', error=str(e))
+
+        thread = threading.Thread(target=_format_background, args=(job_id, data, raw_text, backend, model, api_key, _t0), daemon=True)
+        thread.start()
+        
+        job_store.cleanup_old_jobs()
+        return jsonify({"job_id": job_id, "status": "pending"}), 202
+
     except Exception as e:
-        print(f"[/format_input] failed after {time.time() - _t0:.1f}s: {e}", flush=True)
         return jsonify({"error": str(e)}), 500
 
+@app.route('/format_input/status/<job_id>', methods=['GET'])
+def format_input_status(job_id):
+    job = job_store.get_job(job_id)
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+    
+    if job['status'] == 'pending':
+        return jsonify({"status": "pending"}), 200
+    elif job['status'] == 'error':
+        return jsonify({"status": "error", "error": job['error']}), 200
+    elif job['status'] == 'done':
+        return jsonify({"status": "done", "result": job['result']}), 200
+
+
+import job_store
+import threading
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    """Handle analysis requests from the frontend"""
+    """Handle analysis requests from the frontend asynchronously"""
     _t0 = time.time()
     try:
         data = request.get_json()
-
         test_case = data.get('test_case', 'easy')
         backend = data.get('backend', DEFAULT_LLM_BACKEND)
         model = data.get('model')
         api_key = data.get('api_key')
-        print(f"[/analyze] starting: test_case={test_case!r} backend={backend!r}"
-              f"{' model=' + repr(model) if model else ''} -- this terminal will "
-              f"print again once it's done, so you can tell it's not stuck.",
-              flush=True)
-
-        if test_case == 'custom':
-            from schemas import AnomalyEvent, CorrelationResult, RetrievedEvidence, StructuredDriver, EvidenceSource
-
-            anomaly_data = data.get('anomaly')
-            correlation_data = data.get('correlation')
-            evidence_data = data.get('evidence')
-
-            if not all([anomaly_data, correlation_data, evidence_data]):
-                return jsonify({"error": "Custom test case requires anomaly, correlation, and evidence data"}), 400
-
-            anomaly = AnomalyEvent(**anomaly_data)
-            correlation_drivers = [StructuredDriver(**driver) for driver in correlation_data.get('drivers', [])]
-            correlation = CorrelationResult(anomaly_id=correlation_data.get('anomaly_id'), drivers=correlation_drivers)
-            evidence_sources = [EvidenceSource(**source) for source in evidence_data.get('sources', [])]
-            evidence = RetrievedEvidence(anomaly_id=evidence_data.get('anomaly_id'), sources=evidence_sources)
-            
-            llm_client = get_llm_client(backend, model, api_key)
-            result = synthesize_enhanced(anomaly, correlation, evidence, llm_client)
-
-        elif test_case == 'live':
-            kpi_id = data.get('kpi_id', 'revenue_total')
-            region = data.get('region', 'Region X')
-            from kpis_endpoint import get_kpi_statuses, _load_metrics_table
-            statuses = get_kpi_statuses()
-            kpi_status = next((s for s in statuses if s['kpi_id'] == kpi_id), None)
-            
-            if not kpi_status:
-                return jsonify({'error': f'KPI {kpi_id!r} not found'}), 404
-            if kpi_status['status'] != 'anomaly':
-                return jsonify({'verdict': 'noise', 'kpi_id': kpi_id, 'status': kpi_status['status'],
-                                'value': kpi_status.get('value'), 'delta_pct': kpi_status.get('delta_pct')})
-            
-            import sys
-            sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'task1'))
-            metrics_table = _load_metrics_table()
-            
-            # Safe import since ingest_pipeline can sometimes cause issues if called incorrectly
+        
+        job_id = job_store.create_job()
+        
+        def _analyze_background(job_id, data, test_case, backend, model, api_key, _t0):
             try:
-                from task1.ingest_pipeline import sample_data
-                doc_store_rows = [row for row in sample_data if 'doc_id' in row]
-            except Exception:
-                doc_store_rows = []
-                
-            from orchestrator.orchestrate import run_downstream_from_record
-            
-            try:
-                pipe_res = run_downstream_from_record(
-                    kpi_status['gate_record'],
-                    metrics_table,
-                    doc_store_rows,
-                    known_competitors=["CompetitorCo"],
-                    historical_log=[],
-                    use_enhanced=True
-                )
-                if pipe_res.error_message:
-                    raise Exception(pipe_res.error_message)
-                
-                # Now synthesize using the *real* llm_client on the task6 schemas!
-                from orchestrator import adapters
-                import task6.schemas as T6_SCHEMAS
-                t6_anomaly = adapters.to_task6_anomaly_event(pipe_res.canonical_anomaly, T6_SCHEMAS.AnomalyEvent)
-                t6_correlation = adapters.to_task6_correlation_result(
-                    pipe_res.canonical_anomaly.event_id, pipe_res.task4_drivers, T6_SCHEMAS.CorrelationResult, T6_SCHEMAS.StructuredDriver
-                )
-                # re-mock evidence if missing
-                if pipe_res.task5_output and pipe_res.task5_output.evidence:
-                    # just map evidence directly if possible, or fallback
-                    doc_lookup = {d.doc_id: d for d in doc_store_rows} if doc_store_rows else {} # won't work well due to missing adapter params but we can try
-                    try:
-                        t6_evidence = adapters.to_task6_retrieved_evidence(
-                            pipe_res.canonical_anomaly.event_id, pipe_res.task5_output.evidence, {d['doc_id']: adapters.to_task5_document_records([d], None)[0] for d in doc_store_rows} if False else {}, # skip
-                            T6_SCHEMAS.RetrievedEvidence, T6_SCHEMAS.EvidenceSource
-                        )
-                    except Exception:
-                        anomaly, correlation, t6_evidence = TEST_CASES['easy']() # fallback evidence
-                else:
-                    anomaly, correlation, t6_evidence = TEST_CASES['easy']() # fallback
+                print(f"[/analyze] starting background job {job_id}: test_case={test_case!r} backend={backend!r}"
+                      f"{' model=' + repr(model) if model else ''}", flush=True)
+
+                if test_case == 'custom':
+                    from dataclasses import fields
+                    from schemas import AnomalyEvent, CorrelationResult, RetrievedEvidence, StructuredDriver, EvidenceSource
                     
-                llm_client = get_llm_client(backend, model, api_key)
-                result = synthesize_enhanced(t6_anomaly, t6_correlation, t6_evidence, llm_client)
-            except Exception as e:
-                # Use mock if orchestrator fails
-                anomaly, correlation, evidence = TEST_CASES['easy']()
-                llm_client = get_llm_client(backend, model, api_key)
-                result = synthesize_enhanced(anomaly, correlation, evidence, llm_client)
-                result['orchestrator_error'] = str(e)
-                
-        else:
-            if test_case not in TEST_CASES:
-                return jsonify({"error": f"Unknown test case: {test_case}"}), 400
-            anomaly, correlation, evidence = TEST_CASES[test_case]()
-            llm_client = get_llm_client(backend, model, api_key)
-            result = synthesize_enhanced(anomaly, correlation, evidence, llm_client)
+                    anomaly_data = data.get('anomaly')
+                    correlation_data = data.get('correlation')
+                    evidence_data = data.get('evidence')
+                    
+                    if not anomaly_data or not correlation_data:
+                        job_store.update_job(job_id, 'error', error="Missing 'anomaly' or 'correlation' data for 'custom' test case.")
+                        return
 
-        response = {
-            "original_story": {
-                "headline": result["original_story"].headline,
-                "explanation": result["original_story"].explanation,
-                "hypotheses": [
-                    {
-                        "cause": h.cause,
-                        "confidence": h.confidence,
-                        "citations": h.citations,
-                        "actions": h.actions
-                    } for h in result["original_story"].hypotheses
-                ],
-                "recommended_actions": result["original_story"].recommended_actions,
-                "overall_confidence": result["original_story"].overall_confidence,
-                "escalate_flag": result["original_story"].escalate_flag
-            },
-            "structured_actions": [
-                {
-                    "driver": a.driver,
-                    "controllable_leverage": a.controllable_leverage,
-                    "action": a.action,
-                    "expected_impact": a.expected_impact,
-                    "owner": a.owner,
-                    "confidence": a.confidence,
-                    "monitoring_plan": a.monitoring_plan
-                } for a in result["structured_actions"]
-            ],
-            "persona_narratives": {
-                persona.value.upper() if hasattr(persona, 'value') else persona.upper(): {
-                    "headline": narrative.headline,
-                    "explanation": narrative.explanation,
-                    "confidence": narrative.overall_confidence,
-                    "escalate": narrative.escalate_flag,
+                    # AnomalyEvent/CorrelationResult/RetrievedEvidence are plain dataclasses,
+                    # not Pydantic models, so they don't have model_validate(). Build them
+                    # by hand instead, filtering to known fields (same pattern used in
+                    # /format_input above).
+                    anomaly_fields = {f.name for f in fields(AnomalyEvent)}
+                    driver_fields = {f.name for f in fields(StructuredDriver)}
+                    source_fields = {f.name for f in fields(EvidenceSource)}
+
+                    anomaly = AnomalyEvent(**{k: v for k, v in anomaly_data.items() if k in anomaly_fields})
+
+                    drivers_data = [{k: v for k, v in d.items() if k in driver_fields}
+                                     for d in correlation_data.get('drivers', [])]
+                    correlation = CorrelationResult(
+                        anomaly_id=correlation_data.get('anomaly_id', anomaly.anomaly_id),
+                        drivers=[StructuredDriver(**d) for d in drivers_data],
+                    )
+
+                    evidence = None
+                    if evidence_data:
+                        sources_data = [{k: v for k, v in s.items() if k in source_fields}
+                                         for s in evidence_data.get('sources', [])]
+                        evidence = RetrievedEvidence(
+                            anomaly_id=evidence_data.get('anomaly_id', anomaly.anomaly_id),
+                            sources=[EvidenceSource(**s) for s in sources_data],
+                        )
+
+                    llm_client = get_llm_client(backend, model, api_key)
+                    result = synthesize_enhanced(anomaly, correlation, evidence, llm_client)
+
+                elif test_case == 'live':
+                    kpi_id = data.get('kpi_id', 'revenue_total')
+                    region = data.get('region', 'Region X')
+                    from kpis_endpoint import get_kpi_statuses, _load_metrics_table
+                    statuses = get_kpi_statuses()
+                    kpi_status = next((s for s in statuses if s['kpi_id'] == kpi_id), None)
+                    
+                    if not kpi_status:
+                        job_store.update_job(job_id, 'error', error=f"KPI {kpi_id} not found")
+                        return
+                    if kpi_status['status'] != 'anomaly':
+                        job_store.update_job(job_id, 'done', result={'verdict': 'noise', 'kpi_id': kpi_id, 'status': kpi_status['status'],
+                                        'value': kpi_status.get('value'), 'delta_pct': kpi_status.get('delta_pct')})
+                        return
+                    
+                    import sys
+                    import os
+                    sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'task1'))
+                    metrics_table = _load_metrics_table()
+                    
+                    try:
+                        from task1.ingest_pipeline import sample_data
+                        doc_store_rows = [row for row in sample_data if 'doc_id' in row]
+                    except Exception:
+                        doc_store_rows = []
+                        
+                    from orchestrator.orchestrate import run_downstream_from_record
+                    
+                    try:
+                        pipe_res = run_downstream_from_record(
+                            kpi_status['gate_record'],
+                            metrics_table,
+                            doc_store_rows,
+                            known_competitors=["CompetitorCo"],
+                            historical_log=[],
+                            use_enhanced=True
+                        )
+                        if pipe_res.error_message:
+                            raise Exception(pipe_res.error_message)
+                        
+                        from orchestrator import adapters
+                        import task6.schemas as T6_SCHEMAS
+                        t6_anomaly = adapters.to_task6_anomaly_event(pipe_res.canonical_anomaly, T6_SCHEMAS.AnomalyEvent)
+                        t6_correlation = adapters.to_task6_correlation_result(
+                            pipe_res.canonical_anomaly.event_id, pipe_res.task4_drivers, T6_SCHEMAS.CorrelationResult, T6_SCHEMAS.StructuredDriver
+                        )
+                        if pipe_res.task5_output and pipe_res.task5_output.evidence:
+                            doc_lookup = {d.doc_id: d for d in doc_store_rows} if doc_store_rows else {}
+                            try:
+                                t6_evidence = adapters.to_task6_retrieved_evidence(
+                                    pipe_res.canonical_anomaly.event_id, pipe_res.task5_output.evidence, {d['doc_id']: adapters.to_task5_document_records([d], None)[0] for d in doc_store_rows} if False else {}, 
+                                    T6_SCHEMAS.RetrievedEvidence, T6_SCHEMAS.EvidenceSource
+                                )
+                            except Exception:
+                                anomaly, correlation, t6_evidence = TEST_CASES['easy']() 
+                        else:
+                            anomaly, correlation, t6_evidence = TEST_CASES['easy']() 
+                            
+                        llm_client = get_llm_client(backend, model, api_key)
+                        result = synthesize_enhanced(t6_anomaly, t6_correlation, t6_evidence, llm_client)
+                    except Exception as e:
+                        anomaly, correlation, evidence = TEST_CASES['easy']()
+                        llm_client = get_llm_client(backend, model, api_key)
+                        result = synthesize_enhanced(anomaly, correlation, evidence, llm_client)
+                        result['orchestrator_error'] = str(e)
+                        
+                else:
+                    if test_case not in TEST_CASES:
+                        job_store.update_job(job_id, 'error', error=f"Unknown test case: {test_case}")
+                        return
+                    anomaly, correlation, evidence = TEST_CASES[test_case]()
+                    llm_client = get_llm_client(backend, model, api_key)
+                    result = synthesize_enhanced(anomaly, correlation, evidence, llm_client)
+        
+                response = {
+                    "original_story": {
+                        "headline": result["original_story"].headline,
+                        "explanation": result["original_story"].explanation,
+                        "hypotheses": [
+                            {
+                                "cause": h.cause,
+                                "confidence": h.confidence,
+                                "citations": h.citations,
+                                "actions": h.actions
+                            } for h in result["original_story"].hypotheses
+                        ],
+                        "recommended_actions": result["original_story"].recommended_actions,
+                        "overall_confidence": result["original_story"].overall_confidence,
+                        "escalate_flag": result["original_story"].escalate_flag
+                    },
                     "structured_actions": [
                         {
                             "driver": a.driver,
@@ -630,53 +652,93 @@ def analyze():
                             "expected_impact": a.expected_impact,
                             "owner": a.owner,
                             "confidence": a.confidence,
-                            "monitoring_plan": a.monitoring_plan,
-                        } for a in narrative.structured_actions
+                            "monitoring_plan": a.monitoring_plan
+                        } for a in result["structured_actions"]
                     ],
-                    "notes": narrative.persona_specific_notes,
+                    "persona_narratives": {
+                        persona.value.upper() if hasattr(persona, 'value') else persona.upper(): {
+                            "headline": narrative.headline,
+                            "explanation": narrative.explanation,
+                            "confidence": narrative.overall_confidence,
+                            "escalate": narrative.escalate_flag,
+                            "structured_actions": [
+                                {
+                                    "driver": a.driver,
+                                    "controllable_leverage": a.controllable_leverage,
+                                    "action": a.action,
+                                    "expected_impact": a.expected_impact,
+                                    "owner": a.owner,
+                                    "confidence": a.confidence,
+                                    "monitoring_plan": a.monitoring_plan,
+                                } for a in narrative.structured_actions
+                            ],
+                            "notes": narrative.persona_specific_notes,
+                        }
+                        for persona, narrative in result.get("persona_narratives", {}).items()
+                    },
+                    "relevant_kpis": [
+                        {
+                            "kpi_id": getattr(kpi, 'kpi_id', str(kpi)),
+                            "name": getattr(kpi, 'name', 'Unknown'),
+                            "formula": getattr(kpi, 'formula', ''),
+                            "owner": getattr(kpi, 'owner', ''),
+                            "access_level": str(getattr(kpi, 'access_level', ''))
+                        } for kpi in result.get("relevant_kpis", [])
+                    ],
+                    "telemetry": result.get("telemetry", {})
                 }
-                for persona, narrative in result.get("persona_narratives", {}).items()
-            },
-            "relevant_kpis": [
-                {
-                    "kpi_id": getattr(kpi, 'kpi_id', str(kpi)),
-                    "name": getattr(kpi, 'name', 'Unknown'),
-                    "formula": getattr(kpi, 'formula', ''),
-                    "owner": getattr(kpi, 'owner', ''),
-                    "access_level": str(getattr(kpi, 'access_level', ''))
-                } for kpi in result.get("relevant_kpis", [])
-            ],
-            "telemetry": result.get("telemetry", {})
-        }
+                
+                from kpis_endpoint import get_kpi_statuses
+                try:
+                    statuses = get_kpi_statuses()
+                    response["early_warnings"] = [{"kpi_id": s["kpi_id"], "status": s["status"]} for s in statuses]
+                except Exception as e:
+                    pass
+                    
+                for opt_key in ["cross_kpi_cascade", "cohort_drilldown", "peer_benchmark", "causal_rankings", "orchestrator_error"]:
+                    if opt_key in result:
+                        response[opt_key] = result[opt_key]
         
-        # Add early_warnings to the /analyze response envelope
-        from kpis_endpoint import get_kpi_statuses
-        try:
-            statuses = get_kpi_statuses()
-            response["early_warnings"] = [{"kpi_id": s["kpi_id"], "status": s["status"]} for s in statuses]
-        except Exception as e:
-            pass
-            
-        if "cross_kpi_cascade" in result:
-            response["cross_kpi_cascade"] = result["cross_kpi_cascade"]
-        if "cohort_drilldown" in result:
-            response["cohort_drilldown"] = result["cohort_drilldown"]
-        if "peer_benchmark" in result:
-            response["peer_benchmark"] = result["peer_benchmark"]
-        if "causal_rankings" in result:
-            response["causal_rankings"] = result["causal_rankings"]
-        if "orchestrator_error" in result:
-            response["orchestrator_error"] = result["orchestrator_error"]
+                if response.get("original_story", {}).get("escalate_flag"):
+                    _fire_webhook({"kpi_id": data.get("kpi_id", "Unknown"), "headline": response["original_story"]["headline"], "confidence": response["original_story"]["overall_confidence"]})
+        
+                print(f"[/analyze] done in {time.time() - _t0:.1f}s", flush=True)
+                job_store.update_job(job_id, 'done', result=response)
+                
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                print(f"[/analyze] failed after {time.time() - _t0:.1f}s: {e}", flush=True)
+                job_store.update_job(job_id, 'error', error=str(e))
 
-        if response.get("original_story", {}).get("escalate_flag"):
-            _fire_webhook({"kpi_id": data.get("kpi_id", "Unknown"), "headline": response["original_story"]["headline"], "confidence": response["original_story"]["overall_confidence"]})
-
-        print(f"[/analyze] done in {time.time() - _t0:.1f}s", flush=True)
-        return jsonify(response)
+        # Start the background thread
+        thread = threading.Thread(target=_analyze_background, args=(job_id, data, test_case, backend, model, api_key, _t0), daemon=True)
+        thread.start()
+        
+        # Cleanup old jobs occasionally
+        job_store.cleanup_old_jobs()
+        
+        return jsonify({"job_id": job_id, "status": "pending"}), 202
 
     except Exception as e:
-        print(f"[/analyze] failed after {time.time() - _t0:.1f}s: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+@app.route('/analyze/status/<job_id>', methods=['GET'])
+def analyze_status(job_id):
+    job = job_store.get_job(job_id)
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+    
+    if job['status'] == 'pending':
+        return jsonify({"status": "pending"}), 200
+    elif job['status'] == 'error':
+        return jsonify({"status": "error", "error": job['error']}), 200
+    elif job['status'] == 'done':
+        resp = {"status": "done", "result": job['result']}
+        return jsonify(resp), 200
+
 
 @app.route('/abstain-check', methods=['POST'])
 def abstain_check():
